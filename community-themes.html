@@ -32,19 +32,10 @@
       line-height: 1.6;
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #000;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--primary);
-      border-radius: 4px;
-    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
 
-    /* Header */
     header {
       padding: 20px 40px;
       border-bottom: 1px solid var(--border);
@@ -89,7 +80,6 @@
       color: var(--primary);
     }
 
-    /* Main Container */
     main {
       max-width: 1400px;
       margin: 0 auto;
@@ -117,7 +107,6 @@
       margin-right: auto;
     }
 
-    /* Controls */
     .controls {
       display: flex;
       gap: 16px;
@@ -167,11 +156,6 @@
       color: var(--text);
       font-size: 14px;
       cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .sort-select:hover {
-      border-color: var(--border-hover);
     }
 
     .upload-btn {
@@ -191,7 +175,6 @@
       box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -223,14 +206,8 @@
     }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .modal-header {
@@ -258,7 +235,6 @@
       color: var(--text);
     }
 
-    /* Form */
     .form-group {
       margin-bottom: 20px;
     }
@@ -297,6 +273,10 @@
       min-height: 80px;
     }
 
+    input[type="file"] {
+      display: none;
+    }
+
     .file-input-label {
       display: flex;
       align-items: center;
@@ -317,20 +297,6 @@
     .file-input-label i {
       font-size: 24px;
       color: var(--primary);
-    }
-
-    .file-input-label span {
-      flex: 1;
-    }
-
-    .file-input-label .filename {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    input[type="file"] {
-      display: none;
     }
 
     .form-submit {
@@ -356,7 +322,6 @@
       cursor: not-allowed;
     }
 
-    /* Themes Grid */
     .themes-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -385,21 +350,6 @@
       width: 100%;
       height: 160px;
       background: linear-gradient(135deg, #1a0a2e 0%, #16213e 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .theme-thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .theme-placeholder {
-      width: 100%;
-      height: 100%;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 4px;
@@ -425,10 +375,6 @@
       flex-direction: column;
     }
 
-    .theme-header {
-      margin-bottom: 12px;
-    }
-
     .theme-name {
       font-size: 16px;
       font-weight: 700;
@@ -439,6 +385,7 @@
     .theme-creator {
       font-size: 12px;
       color: var(--text-muted);
+      margin-bottom: 12px;
     }
 
     .theme-description {
@@ -474,12 +421,6 @@
 
     .star {
       color: #fbbf24;
-      font-size: 14px;
-    }
-
-    .rating-value {
-      font-size: 12px;
-      color: var(--text-muted);
     }
 
     .theme-actions {
@@ -519,7 +460,6 @@
       background: rgba(168, 85, 247, 0.2);
     }
 
-    /* Loading & Empty States */
     .loading {
       text-align: center;
       padding: 60px 20px;
@@ -557,7 +497,6 @@
       color: var(--text);
     }
 
-    /* Toast notifications */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -576,64 +515,24 @@
     }
 
     @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(100px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
-      header {
-        padding: 16px 20px;
-      }
-
-      .header-content {
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      main {
-        padding: 40px 20px;
-      }
-
-      .hero-section h1 {
-        font-size: 32px;
-      }
-
-      .controls {
-        justify-content: stretch;
-      }
-
-      .search-box {
-        max-width: none;
-      }
-
-      .sort-select {
-        width: 100%;
-      }
-
-      .themes-container {
-        grid-template-columns: 1fr;
-      }
-
-      .modal-content {
-        padding: 24px;
-      }
+      header { padding: 16px 20px; }
+      .header-content { flex-direction: column; }
+      main { padding: 40px 20px; }
+      .hero-section h1 { font-size: 32px; }
+      .themes-container { grid-template-columns: 1fr; }
+      .modal-content { padding: 24px; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <div class="header-content">
-      <div class="logo-text">
-        <i class="fas fa-music"></i> NekoBeats Themes
-      </div>
+      <div class="logo-text"><i class="fas fa-music"></i> NekoBeats Themes</div>
       <nav class="header-nav">
         <a href="https://catsdevs.online/NekoBeats-V2/">← Back to NekoBeats</a>
         <a href="https://github.com/justdev-chris/NekoBeats-V2">GitHub</a>
@@ -641,23 +540,16 @@
     </div>
   </header>
 
-  <!-- Main Content -->
   <main>
-    <!-- Hero Section -->
     <section class="hero-section">
       <h1>Community Themes</h1>
       <p>Discover, create, and share custom themes for NekoBeats. Download presets from the community or upload your own.</p>
     </section>
 
-    <!-- Controls -->
     <div class="controls">
       <div class="search-box">
         <i class="fas fa-search"></i>
-        <input 
-          type="text" 
-          id="searchInput" 
-          placeholder="Search themes by name or creator..."
-        >
+        <input type="text" id="searchInput" placeholder="Search themes by name or creator...">
       </div>
       <select id="sortSelect" class="sort-select">
         <option value="newest">Newest First</option>
@@ -669,7 +561,6 @@
       </button>
     </div>
 
-    <!-- Themes Grid -->
     <div id="themesContainer" class="themes-container">
       <div class="loading">
         <i class="fas fa-spinner"></i>
@@ -678,99 +569,44 @@
     </div>
   </main>
 
-  <!-- Upload Modal -->
   <div id="uploadModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Upload Theme</h2>
         <button class="close-btn" onclick="closeUploadModal()">&times;</button>
       </div>
-
       <form id="uploadForm">
         <div class="form-group">
           <label for="username">Your Name</label>
-          <input 
-            type="text" 
-            id="username" 
-            name="username"
-            placeholder="e.g., SoundMaster"
-            maxlength="32"
-            required
-          >
+          <input type="text" id="username" placeholder="e.g., SoundMaster" maxlength="32" required>
         </div>
-
         <div class="form-group">
           <label for="themeName">Theme Name</label>
-          <input 
-            type="text" 
-            id="themeName" 
-            name="name"
-            placeholder="e.g., Cyberpunk Red"
-            maxlength="50"
-            required
-          >
+          <input type="text" id="themeName" placeholder="e.g., Cyberpunk Red" maxlength="50" required>
         </div>
-
         <div class="form-group">
           <label for="description">Description (optional)</label>
-          <textarea 
-            id="description" 
-            name="description"
-            placeholder="Describe your theme..."
-            maxlength="200"
-          ></textarea>
+          <textarea id="description" placeholder="Describe your theme..." maxlength="200"></textarea>
         </div>
-
         <div class="form-group">
           <label for="nbpFile">NBP File *</label>
           <label for="nbpFile" class="file-input-label">
             <i class="fas fa-file-upload"></i>
-            <div>
-              <div>Click to upload or drag & drop</div>
-              <div class="filename">NBP files only (max 5MB)</div>
-            </div>
+            <div>Click to upload or drag & drop</div>
           </label>
-          <input 
-            type="file" 
-            id="nbpFile" 
-            name="nbpFile"
-            accept=".nbp"
-            required
-            onchange="updateFileName()"
-          >
+          <input type="file" id="nbpFile" accept=".nbp" required onchange="updateFileName()">
         </div>
-
-        <div class="form-group">
-          <label for="thumbnail">Thumbnail (optional)</label>
-          <label for="thumbnail" class="file-input-label">
-            <i class="fas fa-image"></i>
-            <div>
-              <div>Click to upload preview image</div>
-              <div class="filename">PNG, JPG, WebP (max 2MB)</div>
-            </div>
-          </label>
-          <input 
-            type="file" 
-            id="thumbnail" 
-            name="thumbnail"
-            accept=".jpg,.jpeg,.png,.gif,.webp"
-            onchange="updateThumbnailName()"
-          >
-        </div>
-
         <button type="submit" class="form-submit" id="submitBtn">Upload Theme</button>
       </form>
     </div>
   </div>
 
-  <!-- Rating Modal -->
   <div id="ratingModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
       <div class="modal-header">
         <h2>Rate Theme</h2>
         <button class="close-btn" onclick="closeRatingModal()">&times;</button>
       </div>
-
       <div style="text-align: center; padding: 20px;">
         <div style="font-size: 48px; margin-bottom: 20px;">
           <span id="star1" class="star" onclick="setRating(1)" style="cursor: pointer;">☆</span>
@@ -779,18 +615,19 @@
           <span id="star4" class="star" onclick="setRating(4)" style="cursor: pointer;">☆</span>
           <span id="star5" class="star" onclick="setRating(5)" style="cursor: pointer;">☆</span>
         </div>
-        <button type="button" class="form-submit" id="submitRating" onclick="submitRating()" style="margin-top: 20px;">Submit Rating</button>
+        <button type="button" class="form-submit" onclick="submitRating()" style="margin-top: 20px;">Submit Rating</button>
       </div>
     </div>
   </div>
 
   <script>
-    const API_BASE = 'https://visa20.ct.ws/nbpbackend.php';
+    // YOUR VERCEL DOMAIN - update this
+    const API_BASE = 'https://nbp.catsdevs.online/api/themes';
+
     let themes = [];
     let currentRatingThemeId = null;
     let currentRating = 0;
 
-    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
       loadThemes();
       document.getElementById('uploadForm').addEventListener('submit', handleUpload);
@@ -798,17 +635,10 @@
       document.getElementById('sortSelect').addEventListener('change', filterThemes);
     });
 
-    // Load themes from API
     async function loadThemes() {
       try {
-        const response = await fetch(`${API_BASE}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+        const response = await fetch(API_BASE);
         const data = await response.json();
-        
         if (data.success) {
           themes = data.themes;
           renderThemes(themes);
@@ -816,162 +646,115 @@
           showToast('Failed to load themes', 'error');
         }
       } catch (error) {
-        console.error('Error loading themes:', error);
+        console.error('Error:', error);
         showToast('Error loading themes', 'error');
       }
     }
 
-    // Render themes grid
     function renderThemes(themesToRender) {
       const container = document.getElementById('themesContainer');
-      
       if (themesToRender.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column: 1/-1;">
-            <div class="empty-state">
-              <i class="fas fa-inbox"></i>
-              <h2>No themes found</h2>
-              <p>Be the first to upload a theme!</p>
-            </div>
-          </div>
-        `;
+        container.innerHTML = '<div style="grid-column: 1/-1;"><div class="empty-state"><i class="fas fa-inbox"></i><h2>No themes found</h2><p>Be the first to upload!</p></div></div>';
         return;
       }
-
       container.innerHTML = themesToRender.map(theme => `
         <div class="theme-card">
           <div class="theme-thumbnail">
-            ${theme.thumbnail ? 
-              `<img src="${theme.thumbnail}" alt="${theme.name}">` :
-              `<div class="theme-placeholder">
-                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0s;"></div>
-                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0.1s;"></div>
-                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0.2s;"></div>
-                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0.3s;"></div>
-              </div>`
-            }
+            <div class="color-bar" style="background: #a855f7; animation-delay: 0s;"></div>
+            <div class="color-bar" style="background: #6366f1; animation-delay: 0.1s;"></div>
+            <div class="color-bar" style="background: #ec4899; animation-delay: 0.2s;"></div>
+            <div class="color-bar" style="background: #f59e0b; animation-delay: 0.3s;"></div>
           </div>
           <div class="theme-content">
-            <div class="theme-header">
-              <div class="theme-name">${escapeHtml(theme.name)}</div>
-              <div class="theme-creator">by ${escapeHtml(theme.creator)}</div>
-            </div>
-            <div class="theme-description">${escapeHtml(theme.description || 'No description')}</div>
+            <div class="theme-name">${esc(theme.name)}</div>
+            <div class="theme-creator">by ${esc(theme.creator)}</div>
+            <div class="theme-description">${esc(theme.description || 'No description')}</div>
             <div class="theme-stats">
-              <div class="stat">
-                <i class="fas fa-download"></i>
-                ${theme.downloads}
-              </div>
-              <div class="rating">
-                <span class="star">★</span>
-                <span class="rating-value">${theme.rating > 0 ? theme.rating.toFixed(1) : 'N/A'}</span>
-              </div>
+              <div class="stat"><i class="fas fa-download"></i>${theme.downloads || 0}</div>
+              <div class="rating"><span class="star">★</span><span>${theme.rating > 0 ? theme.rating.toFixed(1) : 'N/A'}</span></div>
             </div>
             <div class="theme-actions">
-              <button class="download-btn" onclick="downloadTheme('${theme.id}', '${escapeHtml(theme.name)}')">
-                <i class="fas fa-download"></i> Download
-              </button>
-              <button class="rate-btn" onclick="openRatingModal('${theme.id}')">
-                <i class="fas fa-star"></i> Rate
-              </button>
+              <button class="download-btn" onclick="downloadTheme('${theme.id}', '${esc(theme.name)}')"><i class="fas fa-download"></i> Download</button>
+              <button class="rate-btn" onclick="openRatingModal('${theme.id}')"><i class="fas fa-star"></i> Rate</button>
             </div>
           </div>
         </div>
       `).join('');
     }
 
-    // Filter themes by search and sort
     function filterThemes() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const sortBy = document.getElementById('sortSelect').value;
-
-      let filtered = themes.filter(theme => 
-        theme.name.toLowerCase().includes(searchTerm) ||
-        theme.creator.toLowerCase().includes(searchTerm)
-      );
-
-      // Sort
-      if (sortBy === 'most-downloaded') {
-        filtered.sort((a, b) => b.downloads - a.downloads);
-      } else if (sortBy === 'highest-rated') {
-        filtered.sort((a, b) => b.rating - a.rating);
-      } else {
-        filtered.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
-      }
-
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const sort = document.getElementById('sortSelect').value;
+      let filtered = themes.filter(t => t.name.toLowerCase().includes(search) || t.creator.toLowerCase().includes(search));
+      if (sort === 'most-downloaded') filtered.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+      else if (sort === 'highest-rated') filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       renderThemes(filtered);
     }
 
-    // Upload theme
     async function handleUpload(e) {
       e.preventDefault();
-      
-      const formData = new FormData();
-      formData.append('username', document.getElementById('username').value);
-      formData.append('name', document.getElementById('themeName').value);
-      formData.append('description', document.getElementById('description').value);
-      formData.append('nbpFile', document.getElementById('nbpFile').files[0]);
-      
-      if (document.getElementById('thumbnail').files[0]) {
-        formData.append('thumbnail', document.getElementById('thumbnail').files[0]);
+      const username = document.getElementById('username').value;
+      const name = document.getElementById('themeName').value;
+      const description = document.getElementById('description').value;
+      const file = document.getElementById('nbpFile').files[0];
+
+      if (!file) {
+        showToast('Select an NBP file', 'error');
+        return;
       }
 
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Uploading...';
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Uploading...';
 
       try {
-        const response = await fetch(API_BASE, {
-          method: 'POST',
-          body: formData
-        });
-        
-        const data = await response.json();
-
-        if (data.success) {
-          showToast('Theme uploaded successfully!');
-          closeUploadModal();
-          document.getElementById('uploadForm').reset();
-          loadThemes();
-        } else {
-          showToast(data.error || 'Upload failed', 'error');
-        }
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const buffer = e.target.result.split(',')[1];
+          const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, name, description, fileBuffer: buffer })
+          });
+          const data = await response.json();
+          if (data.success) {
+            showToast('Uploaded!');
+            closeUploadModal();
+            document.getElementById('uploadForm').reset();
+            loadThemes();
+          } else {
+            showToast(data.error || 'Upload failed', 'error');
+          }
+          btn.disabled = false;
+          btn.textContent = 'Upload Theme';
+        };
+        reader.readAsDataURL(file);
       } catch (error) {
-        console.error('Error uploading:', error);
-        showToast('Error uploading theme', 'error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Upload Theme';
+        showToast('Error uploading', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Upload Theme';
       }
     }
 
-    // Download theme
-    async function downloadTheme(themeId, themeName) {
+    async function downloadTheme(id, name) {
       try {
-        const response = await fetch(`${API_BASE}?id=${themeId}&action=download`, {
-          method: 'GET'
-        });
+        const response = await fetch(`${API_BASE}?action=download&id=${id}`);
         const blob = await response.blob();
-        
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = themeName + '.nbp';
+        a.download = name + '.nbp';
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
-        showToast(`Downloaded ${themeName}!`);
+        showToast(`Downloaded ${name}!`);
       } catch (error) {
-        console.error('Error downloading:', error);
-        showToast('Error downloading theme', 'error');
+        showToast('Error downloading', 'error');
       }
     }
 
-    // Rating modal
-    function openRatingModal(themeId) {
-      currentRatingThemeId = themeId;
+    function openRatingModal(id) {
+      currentRatingThemeId = id;
       currentRating = 0;
       updateStars();
       document.getElementById('ratingModal').classList.add('active');
@@ -988,38 +771,32 @@
 
     function updateStars() {
       for (let i = 1; i <= 5; i++) {
-        const star = document.getElementById(`star${i}`);
-        star.textContent = i <= currentRating ? '★' : '☆';
+        document.getElementById(`star${i}`).textContent = i <= currentRating ? '★' : '☆';
       }
     }
 
     async function submitRating() {
-      if (currentRating === 0) {
-        showToast('Please select a rating', 'error');
+      if (!currentRating) {
+        showToast('Select a rating', 'error');
         return;
       }
-
       try {
-        const response = await fetch(`${API_BASE}?id=${currentRatingThemeId}&action=rate`, {
+        const response = await fetch(`${API_BASE}?action=rate&id=${currentRatingThemeId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ rating: currentRating })
         });
-
         const data = await response.json();
         if (data.success) {
-          showToast('Rating submitted!');
+          showToast('Rated!');
           closeRatingModal();
           loadThemes();
-        } else {
-          showToast('Failed to submit rating', 'error');
         }
       } catch (error) {
-        showToast('Error submitting rating', 'error');
+        showToast('Error rating', 'error');
       }
     }
 
-    // Upload modal
     function openUploadModal() {
       document.getElementById('uploadModal').classList.add('active');
     }
@@ -1028,47 +805,25 @@
       document.getElementById('uploadModal').classList.remove('active');
     }
 
-    // File name display
     function updateFileName() {
       const file = document.getElementById('nbpFile').files[0];
-      if (file) {
-        const label = document.querySelector('label[for="nbpFile"] + label .filename');
-        if (label) label.textContent = file.name;
-      }
+      if (file) console.log('Selected:', file.name);
     }
 
-    function updateThumbnailName() {
-      const file = document.getElementById('thumbnail').files[0];
-      if (file) {
-        const label = document.querySelector('label[for="thumbnail"] + label .filename');
-        if (label) label.textContent = file.name;
-      }
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
 
-    // Utilities
-    function escapeHtml(text) {
+    function esc(str) {
       const div = document.createElement('div');
-      div.textContent = text;
+      div.textContent = str;
       return div.innerHTML;
     }
 
-    function getRandomColor() {
-      const colors = ['#a855f7', '#6366f1', '#ec4899', '#f59e0b', '#10b981'];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
-    }
-
-    // Close modals on outside click
     document.getElementById('uploadModal').addEventListener('click', (e) => {
       if (e.target.id === 'uploadModal') closeUploadModal();
     });
