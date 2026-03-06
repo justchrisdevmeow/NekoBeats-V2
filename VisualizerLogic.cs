@@ -792,7 +792,6 @@ namespace NekoBeats
             }
             bloomBuffer?.Dispose();
             bloomGraphics?.Dispose();
-            animationTimer?.Dispose();
         }
 
         private struct Particle 
