@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NekoBeats Community Themes - Discover, upload, and share custom audio visualizer themes.">
+  <title>Community Themes | NekoBeats</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #a855f7;
+      --secondary: #6366f1;
+      --bg: #0a0a0a;
+      --bg-alt: #1a1a2e;
+      --text: #ffffff;
+      --text-muted: #aaa;
+      --border: rgba(168, 85, 247, 0.1);
+      --border-hover: rgba(168, 85, 247, 0.3);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, #1a0a2e 100%);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    /* Header */
+    header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    .header-nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    .header-nav a:hover {
+      color: var(--primary);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+
+    .hero-section {
+      margin-bottom: 80px;
+      text-align: center;
+    }
+
+    .hero-section h1 {
+      font-size: 48px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    .hero-section p {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px;
+      padding-left: 40px;
+      background: rgba(168, 85, 247, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--border-hover);
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .sort-select {
+      padding: 12px 16px;
+      background: rgba(168, 85, 247, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .sort-select:hover {
+      border-color: var(--border-hover);
+    }
+
+    .upload-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 8px;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-btn:hover {
+      color: var(--text);
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="file"],
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(168, 85, 247, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--border-hover);
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      background: rgba(168, 85, 247, 0.05);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .file-input-label:hover {
+      border-color: var(--border-hover);
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .file-input-label i {
+      font-size: 24px;
+      color: var(--primary);
+    }
+
+    .file-input-label span {
+      flex: 1;
+    }
+
+    .file-input-label .filename {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 8px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .form-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+    }
+
+    .form-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Themes Grid */
+    .themes-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .theme-card {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(99, 102, 241, 0.05));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--border-hover);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(99, 102, 241, 0.1));
+      box-shadow: 0 20px 40px rgba(168, 85, 247, 0.1);
+    }
+
+    .theme-thumbnail {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #1a0a2e 0%, #16213e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .theme-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .theme-placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 12px;
+      align-content: center;
+    }
+
+    .color-bar {
+      height: 100%;
+      border-radius: 2px;
+      animation: pulse 0.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scaleY(0.3); }
+      50% { transform: scaleY(1); }
+    }
+
+    .theme-content {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .theme-header {
+      margin-bottom: 12px;
+    }
+
+    .theme-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .theme-creator {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .theme-description {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    .theme-stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat i {
+      color: var(--primary);
+    }
+
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .star {
+      color: #fbbf24;
+      font-size: 14px;
+    }
+
+    .rating-value {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .theme-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .download-btn,
+    .rate-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3);
+    }
+
+    .rate-btn {
+      background: rgba(168, 85, 247, 0.1);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .rate-btn:hover {
+      background: rgba(168, 85, 247, 0.2);
+    }
+
+    /* Loading & Empty States */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .loading i {
+      font-size: 48px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 64px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    /* Toast notifications */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 2000;
+      animation: slideInRight 0.3s ease;
+    }
+
+    .toast.error {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      main {
+        padding: 40px 20px;
+      }
+
+      .hero-section h1 {
+        font-size: 32px;
+      }
+
+      .controls {
+        justify-content: stretch;
+      }
+
+      .search-box {
+        max-width: none;
+      }
+
+      .sort-select {
+        width: 100%;
+      }
+
+      .themes-container {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo-text">
+        <i class="fas fa-music"></i> NekoBeats Themes
+      </div>
+      <nav class="header-nav">
+        <a href="https://catsdevs.online/NekoBeats-V2/">← Back to NekoBeats</a>
+        <a href="https://github.com/justdev-chris/NekoBeats-V2">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1>Community Themes</h1>
+      <p>Discover, create, and share custom themes for NekoBeats. Download presets from the community or upload your own.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search themes by name or creator..."
+        >
+      </div>
+      <select id="sortSelect" class="sort-select">
+        <option value="newest">Newest First</option>
+        <option value="most-downloaded">Most Downloaded</option>
+        <option value="highest-rated">Highest Rated</option>
+      </select>
+      <button class="upload-btn" onclick="openUploadModal()">
+        <i class="fas fa-cloud-upload-alt"></i> Upload Theme
+      </button>
+    </div>
+
+    <!-- Themes Grid -->
+    <div id="themesContainer" class="themes-container">
+      <div class="loading">
+        <i class="fas fa-spinner"></i>
+        <p>Loading themes...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Upload Modal -->
+  <div id="uploadModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Upload Theme</h2>
+        <button class="close-btn" onclick="closeUploadModal()">&times;</button>
+      </div>
+
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="username">Your Name</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username"
+            placeholder="e.g., SoundMaster"
+            maxlength="32"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="themeName">Theme Name</label>
+          <input 
+            type="text" 
+            id="themeName" 
+            name="name"
+            placeholder="e.g., Cyberpunk Red"
+            maxlength="50"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description (optional)</label>
+          <textarea 
+            id="description" 
+            name="description"
+            placeholder="Describe your theme..."
+            maxlength="200"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="nbpFile">NBP File *</label>
+          <label for="nbpFile" class="file-input-label">
+            <i class="fas fa-file-upload"></i>
+            <div>
+              <div>Click to upload or drag & drop</div>
+              <div class="filename">NBP files only (max 5MB)</div>
+            </div>
+          </label>
+          <input 
+            type="file" 
+            id="nbpFile" 
+            name="nbpFile"
+            accept=".nbp"
+            required
+            onchange="updateFileName()"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="thumbnail">Thumbnail (optional)</label>
+          <label for="thumbnail" class="file-input-label">
+            <i class="fas fa-image"></i>
+            <div>
+              <div>Click to upload preview image</div>
+              <div class="filename">PNG, JPG, WebP (max 2MB)</div>
+            </div>
+          </label>
+          <input 
+            type="file" 
+            id="thumbnail" 
+            name="thumbnail"
+            accept=".jpg,.jpeg,.png,.gif,.webp"
+            onchange="updateThumbnailName()"
+          >
+        </div>
+
+        <button type="submit" class="form-submit" id="submitBtn">Upload Theme</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Rating Modal -->
+  <div id="ratingModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Rate Theme</h2>
+        <button class="close-btn" onclick="closeRatingModal()">&times;</button>
+      </div>
+
+      <div style="text-align: center; padding: 20px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">
+          <span id="star1" class="star" onclick="setRating(1)" style="cursor: pointer;">☆</span>
+          <span id="star2" class="star" onclick="setRating(2)" style="cursor: pointer;">☆</span>
+          <span id="star3" class="star" onclick="setRating(3)" style="cursor: pointer;">☆</span>
+          <span id="star4" class="star" onclick="setRating(4)" style="cursor: pointer;">☆</span>
+          <span id="star5" class="star" onclick="setRating(5)" style="cursor: pointer;">☆</span>
+        </div>
+        <button type="button" class="form-submit" id="submitRating" onclick="submitRating()" style="margin-top: 20px;">Submit Rating</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://visa20.ct.ws/nbpbackend.php';
+    let themes = [];
+    let currentRatingThemeId = null;
+    let currentRating = 0;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadThemes();
+      document.getElementById('uploadForm').addEventListener('submit', handleUpload);
+      document.getElementById('searchInput').addEventListener('input', filterThemes);
+      document.getElementById('sortSelect').addEventListener('change', filterThemes);
+    });
+
+    // Load themes from API
+    async function loadThemes() {
+      try {
+        const response = await fetch(`${API_BASE}?endpoint=/themes`);
+        const data = await response.json();
+        
+        if (data.success) {
+          themes = data.themes;
+          renderThemes(themes);
+        } else {
+          showToast('Failed to load themes', 'error');
+        }
+      } catch (error) {
+        console.error('Error loading themes:', error);
+        showToast('Error loading themes', 'error');
+      }
+    }
+
+    // Render themes grid
+    function renderThemes(themesToRender) {
+      const container = document.getElementById('themesContainer');
+      
+      if (themesToRender.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1;">
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <h2>No themes found</h2>
+              <p>Be the first to upload a theme!</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = themesToRender.map(theme => `
+        <div class="theme-card">
+          <div class="theme-thumbnail">
+            ${theme.thumbnail ? 
+              `<img src="${theme.thumbnail}" alt="${theme.name}">` :
+              `<div class="theme-placeholder">
+                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0s;"></div>
+                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0.1s;"></div>
+                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0.2s;"></div>
+                <div class="color-bar" style="background: ${getRandomColor()}; animation-delay: 0.3s;"></div>
+              </div>`
+            }
+          </div>
+          <div class="theme-content">
+            <div class="theme-header">
+              <div class="theme-name">${escapeHtml(theme.name)}</div>
+              <div class="theme-creator">by ${escapeHtml(theme.creator)}</div>
+            </div>
+            <div class="theme-description">${escapeHtml(theme.description || 'No description')}</div>
+            <div class="theme-stats">
+              <div class="stat">
+                <i class="fas fa-download"></i>
+                ${theme.downloads}
+              </div>
+              <div class="rating">
+                <span class="star">★</span>
+                <span class="rating-value">${theme.rating > 0 ? theme.rating.toFixed(1) : 'N/A'}</span>
+              </div>
+            </div>
+            <div class="theme-actions">
+              <button class="download-btn" onclick="downloadTheme('${theme.id}', '${escapeHtml(theme.name)}')">
+                <i class="fas fa-download"></i> Download
+              </button>
+              <button class="rate-btn" onclick="openRatingModal('${theme.id}')">
+                <i class="fas fa-star"></i> Rate
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Filter themes by search and sort
+    function filterThemes() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const sortBy = document.getElementById('sortSelect').value;
+
+      let filtered = themes.filter(theme => 
+        theme.name.toLowerCase().includes(searchTerm) ||
+        theme.creator.toLowerCase().includes(searchTerm)
+      );
+
+      // Sort
+      if (sortBy === 'most-downloaded') {
+        filtered.sort((a, b) => b.downloads - a.downloads);
+      } else if (sortBy === 'highest-rated') {
+        filtered.sort((a, b) => b.rating - a.rating);
+      } else {
+        filtered.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+      }
+
+      renderThemes(filtered);
+    }
+
+    // Upload theme
+    async function handleUpload(e) {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('username', document.getElementById('username').value);
+      formData.append('name', document.getElementById('themeName').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('nbpFile', document.getElementById('nbpFile').files[0]);
+      
+      if (document.getElementById('thumbnail').files[0]) {
+        formData.append('thumbnail', document.getElementById('thumbnail').files[0]);
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+
+      try {
+        const response = await fetch(API_BASE, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+
+        if (data.success) {
+          showToast('Theme uploaded successfully!');
+          closeUploadModal();
+          document.getElementById('uploadForm').reset();
+          loadThemes();
+        } else {
+          showToast(data.error || 'Upload failed', 'error');
+        }
+      } catch (error) {
+        console.error('Error uploading:', error);
+        showToast('Error uploading theme', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Upload Theme';
+      }
+    }
+
+    // Download theme
+    async function downloadTheme(themeId, themeName) {
+      try {
+        const response = await fetch(`${API_BASE}?endpoint=/themes/${themeId}/download`);
+        const blob = await response.blob();
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = themeName + '.nbp';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showToast(`Downloaded ${themeName}!`);
+      } catch (error) {
+        console.error('Error downloading:', error);
+        showToast('Error downloading theme', 'error');
+      }
+    }
+
+    // Rating modal
+    function openRatingModal(themeId) {
+      currentRatingThemeId = themeId;
+      currentRating = 0;
+      updateStars();
+      document.getElementById('ratingModal').classList.add('active');
+    }
+
+    function closeRatingModal() {
+      document.getElementById('ratingModal').classList.remove('active');
+    }
+
+    function setRating(rating) {
+      currentRating = rating;
+      updateStars();
+    }
+
+    function updateStars() {
+      for (let i = 1; i <= 5; i++) {
+        const star = document.getElementById(`star${i}`);
+        star.textContent = i <= currentRating ? '★' : '☆';
+      }
+    }
+
+    async function submitRating() {
+      if (currentRating === 0) {
+        showToast('Please select a rating', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}?endpoint=/themes/${currentRatingThemeId}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating: currentRating })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          showToast('Rating submitted!');
+          closeRatingModal();
+          loadThemes();
+        } else {
+          showToast('Failed to submit rating', 'error');
+        }
+      } catch (error) {
+        showToast('Error submitting rating', 'error');
+      }
+    }
+
+    // Upload modal
+    function openUploadModal() {
+      document.getElementById('uploadModal').classList.add('active');
+    }
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.remove('active');
+    }
+
+    // File name display
+    function updateFileName() {
+      const file = document.getElementById('nbpFile').files[0];
+      if (file) {
+        const label = document.querySelector('label[for="nbpFile"] + label .filename');
+        if (label) label.textContent = file.name;
+      }
+    }
+
+    function updateThumbnailName() {
+      const file = document.getElementById('thumbnail').files[0];
+      if (file) {
+        const label = document.querySelector('label[for="thumbnail"] + label .filename');
+        if (label) label.textContent = file.name;
+      }
+    }
+
+    // Utilities
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function getRandomColor() {
+      const colors = ['#a855f7', '#6366f1', '#ec4899', '#f59e0b', '#10b981'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Close modals on outside click
+    document.getElementById('uploadModal').addEventListener('click', (e) => {
+      if (e.target.id === 'uploadModal') closeUploadModal();
+    });
+
+    document.getElementById('ratingModal').addEventListener('click', (e) => {
+      if (e.target.id === 'ratingModal') closeRatingModal();
+    });
+  </script>
+</body>
+</html>
