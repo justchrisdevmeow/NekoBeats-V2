@@ -8,7 +8,6 @@ namespace NekoBeats
     public class ControlPanel : Form
     {
         private VisualizerForm visualizer;
-        private RecorderLogic recorder;
         
         // Controls we need to reference
         private CheckBox rainbowCheck;
@@ -33,17 +32,9 @@ namespace NekoBeats
         private CheckBox clickThroughCheck;
         private CheckBox draggableCheck;
         
-        // Recording controls
-        private Label recordingStatusLabel;
-        private ProgressBar recordingProgressBar;
-        private Button recordBtn;
-        private Button stopBtn;
-        private Timer captureTimer;
-        
         public ControlPanel(VisualizerForm visualizer)
         {
             this.visualizer = visualizer;
-            recorder = new RecorderLogic(visualizer);
             
             // Use the same icon as the main form
             this.Icon = visualizer.Icon;
@@ -450,120 +441,7 @@ namespace NekoBeats
             };
             draggableCheck.CheckedChanged += (s, e) => visualizer.Logic.draggable = draggableCheck.Checked;
             windowTab.Controls.Add(draggableCheck);
-            
-            // === RECORDING TAB ===
-            var recordingTab = new TabPage("Recording");
-            recordingTab.BackColor = Color.FromArgb(40, 40, 40);
-            
-            y = 20;
-            
-            // Resolution
-            recordingTab.Controls.Add(new Label { Text = "Resolution:", Location = new Point(20, y), Size = new Size(100, 20), ForeColor = Color.White });
-            ComboBox resCombo = new ComboBox
-            {
-                Location = new Point(130, y - 3),
-                Size = new Size(150, 25),
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor = Color.FromArgb(50, 50, 50),
-                ForeColor = Color.White
-            };
-            resCombo.Items.AddRange(new[] { "1280x720", "1920x1080", "2560x1440", "3840x2160" });
-            resCombo.SelectedIndex = 1;
-            resCombo.SelectedIndexChanged += (s, e) =>
-            {
-                string[] parts = resCombo.Text.Split('x');
-                recorder.RecordingWidth = int.Parse(parts[0]);
-                recorder.RecordingHeight = int.Parse(parts[1]);
-            };
-            recordingTab.Controls.Add(resCombo);
-            y += 40;
-            
-            // FPS
-            recordingTab.Controls.Add(new Label { Text = "FPS:", Location = new Point(20, y), Size = new Size(100, 20), ForeColor = Color.White });
-            ComboBox fpsCombo2 = new ComboBox
-            {
-                Location = new Point(130, y - 3),
-                Size = new Size(150, 25),
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor = Color.FromArgb(50, 50, 50),
-                ForeColor = Color.White
-            };
-            fpsCombo2.Items.AddRange(new[] { "30", "60", "120" });
-            fpsCombo2.SelectedIndex = 1;
-            fpsCombo2.SelectedIndexChanged += (s, e) =>
-            {
-                recorder.RecordingFPS = int.Parse(fpsCombo2.Text);
-            };
-            recordingTab.Controls.Add(fpsCombo2);
-            y += 40;
-            
-            // Duration
-            recordingTab.Controls.Add(new Label { Text = "Max Duration (sec):", Location = new Point(20, y), Size = new Size(120, 20), ForeColor = Color.White });
-            NumericUpDown durationInput = new NumericUpDown
-            {
-                Location = new Point(150, y - 3),
-                Size = new Size(130, 25),
-                Minimum = 10,
-                Maximum = 3600,
-                Value = 300
-            };
-            durationInput.ValueChanged += (s, e) => recorder.MaxDurationSeconds = (int)durationInput.Value;
-            recordingTab.Controls.Add(durationInput);
-            y += 40;
-            
-            // Status
-            recordingStatusLabel = new Label
-            {
-                Text = "Ready to record",
-                Location = new Point(20, y),
-                Size = new Size(300, 25),
-                ForeColor = Color.Cyan,
-                Font = new Font("Arial", 10, FontStyle.Bold)
-            };
-            recordingTab.Controls.Add(recordingStatusLabel);
-            y += 35;
-            
-            // Progress bar
-            recordingProgressBar = new ProgressBar
-            {
-                Location = new Point(20, y),
-                Size = new Size(300, 20),
-                Minimum = 0,
-                Maximum = 100,
-                Value = 0
-            };
-            recordingTab.Controls.Add(recordingProgressBar);
-            y += 35;
-            
-            // Record button
-            recordBtn = new Button
-            {
-                Text = "Start Recording",
-                Location = new Point(20, y),
-                Size = new Size(140, 35),
-                BackColor = Color.FromArgb(0, 100, 0),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Arial", 10, FontStyle.Bold)
-            };
-            recordBtn.Click += (s, e) => StartRecording_Click();
-            recordingTab.Controls.Add(recordBtn);
-            
-            // Stop button
-            stopBtn = new Button
-            {
-                Text = "Stop Recording",
-                Location = new Point(170, y),
-                Size = new Size(140, 35),
-                BackColor = Color.FromArgb(100, 0, 0),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Arial", 10, FontStyle.Bold),
-                Enabled = false
-            };
-            stopBtn.Click += (s, e) => StopRecording_Click();
-            recordingTab.Controls.Add(stopBtn);
-            
+
             // === CREDITS TAB ===
             var creditsTab = new TabPage("Credits");
             creditsTab.BackColor = Color.FromArgb(40, 40, 40);
@@ -660,7 +538,6 @@ namespace NekoBeats
             tabControl.TabPages.Add(effectsTab);
             tabControl.TabPages.Add(audioTab);
             tabControl.TabPages.Add(windowTab);
-            tabControl.TabPages.Add(recordingTab);
             tabControl.TabPages.Add(creditsTab);
             
             mainPanel.Controls.Add(tabControl);
@@ -732,71 +609,6 @@ namespace NekoBeats
             {
                 visualizer.Logic.barColor = colorDialog.Color;
             }
-        }
-        
-        private void StartRecording_Click()
-        {
-            var saveDialog = new SaveFileDialog
-            {
-                Filter = "MP4 Video (*.mp4)|*.mp4",
-                DefaultExt = "mp4"
-            };
-            
-            if (saveDialog.ShowDialog() == DialogResult.OK)
-            {
-                if (recorder.StartRecording(
-                    saveDialog.FileName,
-                    recorder.RecordingWidth,
-                    recorder.RecordingHeight,
-                    recorder.MaxDurationSeconds,
-                    recorder.RecordingFPS))
-                {
-                    recordingStatusLabel.Text = "Recording... 0 frames";
-                    recordingStatusLabel.ForeColor = Color.Red;
-                    recordBtn.Enabled = false;
-                    stopBtn.Enabled = true;
-                    
-                    // Start timer to capture frames and update UI
-                    captureTimer = new Timer();
-                    captureTimer.Interval = Math.Max(1, 1000 / recorder.RecordingFPS);
-                    captureTimer.Tick += (s, e) =>
-                    {
-                        if (recorder.IsRecording)
-                        {
-                            recorder.CaptureFrame();
-                            recordingStatusLabel.Text = $"Recording... {recorder.FramesRecorded} frames";
-                            recordingProgressBar.Value = (int)(recorder.RecordingProgress * 100);
-                        }
-                        else
-                        {
-                            captureTimer.Stop();
-                            captureTimer.Dispose();
-                            captureTimer = null;
-                        }
-                    };
-                    captureTimer.Start();
-                }
-            }
-        }
-        
-        private void StopRecording_Click()
-        {
-            recorder.StopRecording();
-            
-            if (captureTimer != null)
-            {
-                captureTimer.Stop();
-                captureTimer.Dispose();
-                captureTimer = null;
-            }
-            
-            recordingStatusLabel.Text = "Recording stopped. Encoding...";
-            recordingStatusLabel.ForeColor = Color.Yellow;
-            recordBtn.Enabled = true;
-            stopBtn.Enabled = false;
-            recordingProgressBar.Value = 0;
-            
-            recorder.EncodeToMP4();
         }
         
         public void UpdateControlsFromVisualizer()
