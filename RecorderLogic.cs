@@ -1,9 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using NAudio.Wave;
 using SharpAvi;
-using SharpAvi.Codecs;
 using SharpAvi.Output;
 
 namespace NekoBeats
@@ -48,15 +46,13 @@ namespace NekoBeats
                 // Initialize AVI writer
                 aviWriter = new AviWriter(outputPath);
                 
-                // Add video stream with MotionJpeg codec
+                // Add video stream
                 videoStream = aviWriter.AddVideoStream();
                 videoStream.Width = width;
                 videoStream.Height = height;
-                videoStream.FramesPerSecond = fps;
-                videoStream.Codec = KnownFourCCs.Codecs.MotionJpeg;
                 
                 // Initialize frame buffer
-                frameBuffer = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+                frameBuffer = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                 frameGraphics = Graphics.FromImage(frameBuffer);
                 
                 isRecording = true;
@@ -65,7 +61,7 @@ namespace NekoBeats
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to start recording: {ex.Message}", "Recording Error");
-                aviWriter?.Dispose();
+                try { aviWriter?.Close(); } catch { }
                 return false;
             }
         }
@@ -92,8 +88,18 @@ namespace NekoBeats
                 frameGraphics.Clear(Color.Magenta);
                 visualizerLogic.Render(frameGraphics, new Size(RecordingWidth, RecordingHeight));
                 
-                // Write frame to AVI video stream
-                videoStream.WriteFrame(true, frameBuffer, 0, frameBuffer.Width * frameBuffer.Height * 4);
+                // Convert bitmap to byte array for video stream
+                System.Drawing.Imaging.BitmapData bmpData = frameBuffer.LockBits(
+                    new Rectangle(0, 0, frameBuffer.Width, frameBuffer.Height),
+                    System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                    System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                
+                byte[] frameData = new byte[Math.Abs(bmpData.Stride) * frameBuffer.Height];
+                System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, frameData, 0, frameData.Length);
+                frameBuffer.UnlockBits(bmpData);
+                
+                // Write frame
+                videoStream.WriteFrame(true, frameData, 0, frameData.Length);
                 frameCount++;
             }
             catch (Exception ex)
@@ -129,7 +135,7 @@ namespace NekoBeats
             StopRecording();
             frameGraphics?.Dispose();
             frameBuffer?.Dispose();
-            aviWriter?.Dispose();
+            try { aviWriter?.Close(); } catch { }
         }
     }
 }
