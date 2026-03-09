@@ -208,9 +208,9 @@ namespace NekoBeats
                 }
             }
             
-            // Update edge glow
+            // Update edge glow with clamping to prevent alpha overflow
             float bass = GetBassLevel();
-            currentGlowIntensity = Math.Max(currentGlowIntensity * 0.9f, bass * edgeGlowIntensity * 2);
+            currentGlowIntensity = Math.Min(1.0f, Math.Max(currentGlowIntensity * 0.9f, bass * edgeGlowIntensity * 2));
         }
         
         public void Render(Graphics g, Size clientSize)
@@ -240,10 +240,10 @@ namespace NekoBeats
             if (particlesEnabled)
                 DrawParticles(g, clientSize);
             
-            // Draw edge glow
+            // Draw edge glow with proper alpha clamping
             if (edgeGlowEnabled && currentGlowIntensity > 0.05f)
             {
-                int alpha = (int)(currentGlowIntensity * 150);
+                int alpha = Math.Min(255, (int)(currentGlowIntensity * 150));
                 using (SolidBrush glowBrush = new SolidBrush(Color.FromArgb(alpha, barColor)))
                 {
                     // Top glow
@@ -268,16 +268,12 @@ namespace NekoBeats
         {
             if (isTransitioning)
             {
-                // For transitions, we need a way to blend
-                // Simple approach: draw old style semi-transparent, then new style
                 if (circleMode)
                 {
                     DrawCircleVisualizer(g, clientSize);
                 }
                 else
                 {
-                    // For now, just draw current style during transition
-                    // A full crossfade would require render targets
                     switch (_animationStyle)
                     {
                         case AnimationStyle.Pulse:
@@ -437,9 +433,8 @@ namespace NekoBeats
                 Color barColorToUse;
                 if (rainbowBars)
                 {
-                    // Map height to rainbow colors (red = low, purple = high)
                     float intensity = Math.Min(1.0f, h / (clientSize.Height * 0.5f));
-                    float hue = intensity * 300; // 0 = red, 300 = purple
+                    float hue = intensity * 300;
                     barColorToUse = ColorFromHSV(hue, 1.0f, 1.0f);
                 }
                 else
@@ -656,7 +651,6 @@ namespace NekoBeats
         {
             if (!bloomEnabled || bloomBuffer == null) return;
             
-            // Simple blur effect
             for (int i = 0; i < bloomIntensity / 5; i++)
             {
                 var blur = new Bitmap(bloomBuffer);
@@ -776,7 +770,6 @@ namespace NekoBeats
                 clickThrough = root.GetProperty("clickThrough").GetBoolean();
                 draggable = root.GetProperty("draggable").GetBoolean();
                 
-                // New properties (with fallback for old presets)
                 if (root.TryGetProperty("rainbowBars", out var rainbowProp))
                     rainbowBars = rainbowProp.GetBoolean();
                     
