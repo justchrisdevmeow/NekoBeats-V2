@@ -683,9 +683,7 @@ namespace NekoBeats
                     clickThrough,
                     draggable,
                     rainbowBars,
-                    barSpacing,
-                    edgeGlowEnabled,
-                    edgeGlowIntensity
+                    barSpacing
                 };
                 
                 string json = JsonSerializer.Serialize(preset, new JsonSerializerOptions { WriteIndented = true });
@@ -730,12 +728,6 @@ namespace NekoBeats
                     
                 if (root.TryGetProperty("barSpacing", out var spacingProp))
                     barSpacing = spacingProp.GetInt32();
-                    
-                if (root.TryGetProperty("edgeGlowEnabled", out var glowProp))
-                    edgeGlowEnabled = glowProp.GetBoolean();
-                    
-                if (root.TryGetProperty("edgeGlowIntensity", out var glowIntensityProp))
-                    edgeGlowIntensity = glowIntensityProp.GetSingle();
             } 
             catch (Exception ex)
             {
@@ -761,4 +753,3 @@ namespace NekoBeats
         }
     }
 }
-
