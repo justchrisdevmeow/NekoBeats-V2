@@ -36,12 +36,10 @@ namespace NekoBeats
         public bool colorCycling = false;
         public float colorSpeed = 1.0f;
         
-        // NEW FEATURES
+        // Bar themes
         public bool rainbowBars = true;
         public int barSpacing = 1;
-        public bool edgeGlowEnabled = false;
-        public float edgeGlowIntensity = 0.5f;
-        private float currentGlowIntensity = 0;
+        private BarRenderer barRenderer;
         
         // Effects
         public bool bloomEnabled = false;
@@ -99,6 +97,7 @@ namespace NekoBeats
             InitializeAudio();
             InitializeParticles();
             animationTimer.Start();
+            barRenderer = new BarRenderer(smoothedBarValues, barColor, sensitivity, barHeight, barCount, barSpacing, rainbowBars);
         }
         
         public void Initialize(Size clientSize)
@@ -208,9 +207,14 @@ namespace NekoBeats
                 }
             }
             
-            // Update edge glow with clamping to prevent alpha overflow
-            float bass = GetBassLevel();
-            currentGlowIntensity = Math.Min(1.0f, Math.Max(currentGlowIntensity * 0.9f, bass * edgeGlowIntensity * 2));
+            // Update bar renderer
+            barRenderer.smoothedBarValues = smoothedBarValues;
+            barRenderer.barColor = barColor;
+            barRenderer.sensitivity = sensitivity;
+            barRenderer.barHeight = barHeight;
+            barRenderer.barCount = barCount;
+            barRenderer.barSpacing = barSpacing;
+            barRenderer.rainbowBars = rainbowBars;
         }
         
         public void Render(Graphics g, Size clientSize)
@@ -231,7 +235,7 @@ namespace NekoBeats
             if (bloomEnabled && bloomGraphics != null)
             {
                 bloomGraphics.Clear(Color.Transparent);
-                DrawVisualization(bloomGraphics, clientSize);
+                DrawVisualization(g, clientSize);
             }
             
             // Draw main visualization
@@ -239,23 +243,6 @@ namespace NekoBeats
             
             if (particlesEnabled)
                 DrawParticles(g, clientSize);
-            
-            // Draw edge glow with proper alpha clamping
-            if (edgeGlowEnabled && currentGlowIntensity > 0.05f)
-            {
-                int alpha = Math.Min(255, (int)(currentGlowIntensity * 150));
-                using (SolidBrush glowBrush = new SolidBrush(Color.FromArgb(alpha, barColor)))
-                {
-                    // Top glow
-                    g.FillRectangle(glowBrush, 0, 0, clientSize.Width, 30);
-                    // Bottom glow
-                    g.FillRectangle(glowBrush, 0, clientSize.Height - 30, clientSize.Width, 30);
-                    // Left glow
-                    g.FillRectangle(glowBrush, 0, 0, 30, clientSize.Height);
-                    // Right glow
-                    g.FillRectangle(glowBrush, clientSize.Width - 30, 0, 30, clientSize.Height);
-                }
-            }
             
             // Apply bloom effect
             if (bloomEnabled && bloomBuffer != null)
@@ -416,39 +403,7 @@ namespace NekoBeats
             }
             else
             {
-                DrawBarVisualizerDefault(g, clientSize);
-            }
-        }
-
-        private void DrawBarVisualizerDefault(Graphics g, Size clientSize)
-        {
-            float barWidth = (float)clientSize.Width / barCount;
-            float heightMultiplier = barHeight / 100f;
-            
-            for (int i = 0; i < barCount; i++)
-            {
-                float h = smoothedBarValues[i] * (clientSize.Height * heightMultiplier);
-                if (h < 2) h = 2;
-                
-                Color barColorToUse;
-                if (rainbowBars)
-                {
-                    float intensity = Math.Min(1.0f, h / (clientSize.Height * 0.5f));
-                    float hue = intensity * 300;
-                    barColorToUse = ColorFromHSV(hue, 1.0f, 1.0f);
-                }
-                else
-                {
-                    barColorToUse = barColor;
-                }
-                
-                float x = i * barWidth;
-                float y = clientSize.Height - h;
-                
-                using (SolidBrush brush = new SolidBrush(barColorToUse))
-                {
-                    g.FillRectangle(brush, x, y, barWidth - barSpacing, h);
-                }
+                barRenderer.Render(g, clientSize);
             }
         }
         
@@ -806,3 +761,4 @@ namespace NekoBeats
         }
     }
 }
+
