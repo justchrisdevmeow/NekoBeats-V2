@@ -26,7 +26,6 @@ namespace NekoBeats
         private CheckBox colorCycleCheck;
         private CheckBox bloomCheck;
         private CheckBox particlesCheck;
-        private CheckBox circleModeCheck;
         private CheckBox clickThroughCheck;
         private CheckBox draggableCheck;
         
@@ -92,15 +91,15 @@ namespace NekoBeats
             visTab.Controls.Add(new Label { Text = "Bar Theme:", Location = new Point(20, y), Size = new Size(100, 20), ForeColor = Color.White });
             themeCombo = new ComboBox { Location = new Point(130, y - 3), Size = new Size(150, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(50, 50, 50), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
             themeCombo.Items.AddRange(Enum.GetNames(typeof(BarRenderer.BarTheme)));
-            themeCombo.SelectedIndexChanged += (s, e) => visualizer.Logic.barRenderer.currentTheme = (BarRenderer.BarTheme)themeCombo.SelectedIndex;
+            themeCombo.SelectedIndexChanged += (s, e) => visualizer.Logic.BarLogic.currentTheme = (BarRenderer.BarTheme)themeCombo.SelectedIndex;
             visTab.Controls.Add(themeCombo);
             y += 35;
             
             // Animation Style
             visTab.Controls.Add(new Label { Text = "Animation Style:", Location = new Point(20, y), Size = new Size(100, 20), ForeColor = Color.White });
             styleCombo = new ComboBox { Location = new Point(130, y - 3), Size = new Size(150, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(50, 50, 50), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            styleCombo.Items.AddRange(Enum.GetNames(typeof(VisualizerLogic.AnimationStyle)));
-            styleCombo.SelectedIndexChanged += (s, e) => visualizer.Logic.animationStyle = (VisualizerLogic.AnimationStyle)styleCombo.SelectedIndex;
+            styleCombo.Items.AddRange(Enum.GetNames(typeof(BarLogic.AnimationStyle)));
+            styleCombo.SelectedIndexChanged += (s, e) => visualizer.Logic.animationStyle = (BarLogic.AnimationStyle)styleCombo.SelectedIndex;
             visTab.Controls.Add(styleCombo);
             y += 35;
             
@@ -156,12 +155,8 @@ namespace NekoBeats
             effectsTab.Controls.Add(particleCountTrack);
             y += 35;
             
-            circleModeCheck = new CheckBox { Text = "Circle Mode", Location = new Point(20, y), Size = new Size(120, 25), ForeColor = Color.White };
-            circleModeCheck.CheckedChanged += (s, e) => visualizer.Logic.circleMode = circleModeCheck.Checked;
-            effectsTab.Controls.Add(circleModeCheck);
-            
-            effectsTab.Controls.Add(new Label { Text = "Radius:", Location = new Point(150, y + 5), Size = new Size(60, 20), ForeColor = Color.White });
-            circleRadiusTrack = new TrackBar { Location = new Point(220, y - 2), Size = new Size(150, 45), Minimum = 50, Maximum = 500, TickStyle = TickStyle.None, BackColor = Color.FromArgb(40, 40, 40) };
+            effectsTab.Controls.Add(new Label { Text = "Circle Radius:", Location = new Point(20, y), Size = new Size(80, 20), ForeColor = Color.White });
+            circleRadiusTrack = new TrackBar { Location = new Point(110, y - 5), Size = new Size(260, 45), Minimum = 50, Maximum = 500, TickStyle = TickStyle.None, BackColor = Color.FromArgb(40, 40, 40) };
             circleRadiusTrack.ValueChanged += (s, e) => visualizer.Logic.circleRadius = circleRadiusTrack.Value;
             effectsTab.Controls.Add(circleRadiusTrack);
             
@@ -275,7 +270,7 @@ namespace NekoBeats
         {
             colorCycleCheck.Checked = visualizer.Logic.colorCycling;
             rainbowCheck.Checked = visualizer.Logic.rainbowBars;
-            themeCombo.SelectedIndex = (int)visualizer.Logic.barRenderer.currentTheme;
+            themeCombo.SelectedIndex = (int)visualizer.Logic.BarLogic.currentTheme;
             styleCombo.SelectedIndex = (int)visualizer.Logic.animationStyle;
             barCountTrack.Value = visualizer.Logic.barCount;
             barHeightTrack.Value = visualizer.Logic.barHeight;
@@ -285,7 +280,6 @@ namespace NekoBeats
             bloomIntensityTrack.Value = visualizer.Logic.bloomIntensity;
             particlesCheck.Checked = visualizer.Logic.particlesEnabled;
             particleCountTrack.Value = visualizer.Logic.particleCount;
-            circleModeCheck.Checked = visualizer.Logic.circleMode;
             circleRadiusTrack.Value = (int)visualizer.Logic.circleRadius;
             sensitivityTrack.Value = (int)(visualizer.Logic.sensitivity * 100);
             smoothSpeedTrack.Value = (int)(visualizer.Logic.smoothSpeed * 100);
