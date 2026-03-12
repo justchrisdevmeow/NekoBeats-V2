@@ -24,7 +24,7 @@ Name: “english”; MessagesFile: “compiler:Default.isl”
 
 [Tasks]
 Name: “desktopicon”; Description: “{cm:CreateDesktopIcon}”; GroupDescription: “{cm:AdditionalIcons}”; Flags: unchecked
-Name: “quicklaunchicon”; Description: “{cm:CreateQuickLaunchIcon}”; GroupDescription: “{cm:AdditionalIcons}”; Flags: unchecked; OnlyBelowVersion: 0,6.1
+Name: “quicklaunch”; Description: “{cm:CreateQuickLaunchIcon}”; GroupDescription: “{cm:AdditionalIcons}”; Flags: unchecked; OnlyBelowVersion: 0,6.1
 Name: “startmenu”; Description: “Create Start Menu shortcut”; GroupDescription: “{cm:AdditionalIcons}”; Flags: unchecked
 
 [Files]
@@ -37,7 +37,7 @@ Source: “NekoBeatsLogo.png”; DestDir: “{app}”; Flags: ignoreversion
 Name: “{group}\NekoBeats”; Filename: “{app}\NekoBeats.exe”; IconFileName: “{app}\NekoBeatsLogo.ico”; Comment: “Audio Visualizer”
 Name: “{group}{cm:UninstallProgram,NekoBeats}”; Filename: “{uninstallexe}”
 Name: “{autodesktop}\NekoBeats”; Filename: “{app}\NekoBeats.exe”; Tasks: desktopicon; IconFileName: “{app}\NekoBeatsLogo.ico”; Comment: “Audio Visualizer”
-Name: “{userappdata}\Microsoft\Internet Explorer\Quick Launch\NekoBeats”; Filename: “{app}\NekoBeats.exe”; Tasks: quicklaunchicon; IconFileName: “{app}\NekoBeatsLogo.ico”
+Name: “{userappdata}\Microsoft\Internet Explorer\Quick Launch\NekoBeats”; Filename: “{app}\NekoBeats.exe”; Tasks: quicklaunch; IconFileName: “{app}\NekoBeatsLogo.ico”
 
 [Run]
 Filename: “{app}\NekoBeats.exe”; Description: “{cm:LaunchProgram,NekoBeats}”; Flags: nowait postinstall skipifsilent
