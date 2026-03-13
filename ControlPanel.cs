@@ -300,6 +300,28 @@ private VisualizerForm visualizer;
             case "WINDOW":
                 AddLabel(currentTabPanel, "[[ WINDOW ]]", ref y);
                 
+                var streamingBtn = new Button
+                {
+                    Text = ">> STREAMING MODE <<",
+                    Location = new Point(20, y),
+                    Size = new Size(250, 35),
+                    BackColor = neonPurple,
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    Font = new Font("Courier New", 10, FontStyle.Bold),
+                    Cursor = Cursors.Hand,
+                    Tag = false
+                };
+                streamingBtn.Click += (s, e) => 
+                { 
+                    bool isEnabled = (bool)streamingBtn.Tag;
+                    visualizer.SetStreamingMode(!isEnabled);
+                    streamingBtn.Tag = !isEnabled;
+                    streamingBtn.Text = !isEnabled ? ">> STREAMING MODE ON <<" : ">> STREAMING MODE <<";
+                };
+                currentTabPanel.Controls.Add(streamingBtn);
+                y += 50;
+                
                 AddComboControl(currentTabPanel, "FPS Limit:", ref y, out fpsCombo, new string[] { "30 FPS", "60 FPS", "120 FPS", "Uncapped" });
                 fpsCombo.SelectedIndex = 1;
                 fpsCombo.SelectedIndexChanged += (s, e) => { visualizer.Logic.fpsLimit = fpsCombo.Text switch { "30 FPS" => 30, "60 FPS" => 60, "120 FPS" => 120, _ => 999 }; visualizer.UpdateFPSTimer(); };
