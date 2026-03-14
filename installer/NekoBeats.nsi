@@ -3,9 +3,9 @@
 ; ---------------------------------------------------------
 ; Banner + Header images (MUST be before MUI_PAGE macros)
 ; ---------------------------------------------------------
-!define MUI_WELCOMEFINISHPAGE_BITMAP "installer/NekoBeatsBanner.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "NekoBeatsBanner.bmp"
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "installer/NekoBeatsHeader.bmp"
+!define MUI_HEADERIMAGE_BITMAP "NekoBeatsHeader.bmp"
 !define MUI_HEADERIMAGE_HEIGHT 57
 !define MUI_HEADERIMAGE_RIGHT
 
