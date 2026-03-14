@@ -37,10 +37,11 @@ A sleek audio visualizer that turns your music into floating light bars. Revived
 Want to record your NekoBeats visualizations? We recommend using **[OBS Studio](https://obsproject.com/)** - it's free and gives you full control:
 
 1. Download and open OBS
-2. Click **"+ Scene"** to create a new scene
-3. Add NekoBeats window as a source (Window Capture or Game Capture)
-4. Configure audio (System Audio or Mic)
-5. Click **Start Recording** and enjoy!
+2. Turn on Streaming Mode in Control Panel
+3. Click **"+ Scene"** to create a new scene
+4. Add NekoBeats window as a source (Window Capture or Game Capture)
+5. Configure audio (System Audio or Mic)
+6. Click **Start Recording** and enjoy!
 
 OBS handles video compression, audio-video sync, and quality settings - way better than anything we could build in-app.
 
