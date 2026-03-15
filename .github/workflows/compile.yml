@@ -33,6 +33,7 @@ jobs:
     
     - name: Build Installer
       run: |
+        cd installer
         & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" NekoBeats.iss
     
     - name: Upload Installer
