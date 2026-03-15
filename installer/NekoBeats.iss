@@ -11,14 +11,15 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64
+SetupIconFile=NekoBeatsLogo.ico
+WizardImageFile=NekoBeatsBanner.bmp
+WizardImageStretch=yes
 
 [Files]
 Source: "..\bin\Release\net8.0-windows\win-x64\publish\NekoBeats.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\bin\Release\net8.0-windows\win-x64\publish\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "NekoBeatsLogo.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "NekoBeatsLogo.png"; DestDir: "{app}"; Flags: ignoreversion
-Source: "NekoBeatsBanner.bmp"; DestDir: "{app}"; Flags: ignoreversion
-Source: "NekoBeatsHeader.bmp"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\NekoBeats"; Filename: "{app}\NekoBeats.exe"; IconFilename: "{app}\NekoBeatsLogo.ico"
