@@ -154,16 +154,16 @@ namespace NekoBeats
                     AddComboControl(vizGroup, "Style:", ref gy, out styleCombo, typeof(BarLogic.AnimationStyle));
                     styleCombo.SelectedIndexChanged += (s, e) => visualizer.Logic.animationStyle = (BarLogic.AnimationStyle)styleCombo.SelectedIndex;
                     
-                    AddSliderControl(vizGroup, "Bar Count:", ref gy, out barCountTrack, 32, 512, 100);
+                    barCountTrack = AddSliderControl(vizGroup, "Bar Count:", ref gy, 32, 512, 100);
                     barCountTrack.ValueChanged += (s, e) => visualizer.Logic.barCount = barCountTrack.Value;
                     
-                    AddSliderControl(vizGroup, "Bar Height:", ref gy, out barHeightTrack, 10, 200, 50);
+                    barHeightTrack = AddSliderControl(vizGroup, "Bar Height:", ref gy, 10, 200, 50);
                     barHeightTrack.ValueChanged += (s, e) => visualizer.Logic.barHeight = barHeightTrack.Value;
                     
-                    AddSliderControl(vizGroup, "Bar Spacing:", ref gy, out spacingTrack, 0, 20, 2);
+                    spacingTrack = AddSliderControl(vizGroup, "Bar Spacing:", ref gy, 0, 20, 2);
                     spacingTrack.ValueChanged += (s, e) => visualizer.Logic.barSpacing = spacingTrack.Value;
                     
-                    AddSliderControl(vizGroup, "Opacity:", ref gy, out opacityTrack, 10, 100, 100);
+                    opacityTrack = AddSliderControl(vizGroup, "Opacity:", ref gy, 10, 100, 100);
                     opacityTrack.ValueChanged += (s, e) => { visualizer.Logic.opacity = opacityTrack.Value / 100f; visualizer.Opacity = visualizer.Logic.opacity; };
                     
                     currentTabPanel.Controls.Add(vizGroup);
@@ -186,7 +186,7 @@ namespace NekoBeats
                     colorCycleCheck.CheckedChanged += (s, e) => visualizer.Logic.colorCycling = colorCycleCheck.Checked;
                     gy += 35;
                     
-                    AddSliderControl(colorGroup, "Color Speed:", 20, gy, out colorSpeedTrack, 1, 20, 10);
+                    colorSpeedTrack = AddSliderControl(colorGroup, "Color Speed:", 20, gy, 1, 20, 10);
                     colorSpeedTrack.ValueChanged += (s, e) => visualizer.Logic.colorSpeed = colorSpeedTrack.Value / 10f;
                     
                     currentTabPanel.Controls.Add(colorGroup);
@@ -200,7 +200,7 @@ namespace NekoBeats
                     bloomCheck.CheckedChanged += (s, e) => visualizer.Logic.bloomEnabled = bloomCheck.Checked;
                     gy += 35;
                     
-                    AddSliderControl(fxGroup, "Bloom Intensity:", 20, gy, out bloomIntensityTrack, 5, 30, 15);
+                    bloomIntensityTrack = AddSliderControl(fxGroup, "Bloom Intensity:", 20, gy, 5, 30, 15);
                     bloomIntensityTrack.ValueChanged += (s, e) => visualizer.Logic.bloomIntensity = bloomIntensityTrack.Value;
                     gy += 45;
                     
@@ -208,7 +208,7 @@ namespace NekoBeats
                     particlesCheck.CheckedChanged += (s, e) => { visualizer.Logic.particlesEnabled = particlesCheck.Checked; if (particlesCheck.Checked) visualizer.Logic.Resize(visualizer.ClientSize); };
                     gy += 35;
                     
-                    AddSliderControl(fxGroup, "Particle Count:", 20, gy, out particleCountTrack, 20, 500, 100);
+                    particleCountTrack = AddSliderControl(fxGroup, "Particle Count:", 20, gy, 20, 500, 100);
                     particleCountTrack.ValueChanged += (s, e) => { visualizer.Logic.particleCount = particleCountTrack.Value; if (particlesCheck.Checked) visualizer.Logic.Resize(visualizer.ClientSize); };
                     gy += 45;
                     
@@ -216,7 +216,7 @@ namespace NekoBeats
                     circleModeCheck.CheckedChanged += (s, e) => visualizer.Logic.BarLogic.isCircleMode = circleModeCheck.Checked;
                     gy += 35;
                     
-                    AddSliderControl(fxGroup, "Circle Radius:", 20, gy, out circleRadiusTrack, 50, 500, 200);
+                    circleRadiusTrack = AddSliderControl(fxGroup, "Circle Radius:", 20, gy, 50, 500, 200);
                     circleRadiusTrack.ValueChanged += (s, e) => visualizer.Logic.circleRadius = circleRadiusTrack.Value;
                     
                     currentTabPanel.Controls.Add(fxGroup);
@@ -226,11 +226,11 @@ namespace NekoBeats
                     var audioGroup = CreateGroupBox("Audio Settings", 10, y, 900, 160);
                     gy = 25;
                     
-                    AddSliderControl(audioGroup, "Sensitivity:", 20, gy, out sensitivityTrack, 10, 300, 100);
+                    sensitivityTrack = AddSliderControl(audioGroup, "Sensitivity:", 20, gy, 10, 300, 100);
                     sensitivityTrack.ValueChanged += (s, e) => visualizer.Logic.sensitivity = sensitivityTrack.Value / 100f;
                     gy += 45;
                     
-                    AddSliderControl(audioGroup, "Smoothing:", 20, gy, out smoothSpeedTrack, 1, 50, 10);
+                    smoothSpeedTrack = AddSliderControl(audioGroup, "Smoothing:", 20, gy, 1, 50, 10);
                     smoothSpeedTrack.ValueChanged += (s, e) => visualizer.Logic.smoothSpeed = smoothSpeedTrack.Value / 100f;
                     
                     currentTabPanel.Controls.Add(audioGroup);
@@ -321,7 +321,7 @@ namespace NekoBeats
             return gb;
         }
         
-        private void AddSliderControl(Control parent, string label, ref int y, out TrackBar trackBar, int min, int max, int defaultVal)
+        private TrackBar AddSliderControl(Control parent, string label, ref int y, int min, int max, int defaultVal)
         {
             var labelCtrl = new Label { Text = label, Location = new Point(20, y), Size = new Size(140, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
             parent.Controls.Add(labelCtrl);
@@ -329,13 +329,14 @@ namespace NekoBeats
             var valueLabel = new Label { Text = defaultVal.ToString(), Location = new Point(800, y), Size = new Size(70, 20), ForeColor = neonCyan, Font = new Font("Courier New", 9), TextAlign = ContentAlignment.TopRight };
             parent.Controls.Add(valueLabel);
             
-            trackBar = new TrackBar { Location = new Point(170, y - 5), Size = new Size(620, 45), Minimum = min, Maximum = max, Value = defaultVal, TickStyle = TickStyle.None, BackColor = boxBg };
+            var trackBar = new TrackBar { Location = new Point(170, y - 5), Size = new Size(620, 45), Minimum = min, Maximum = max, Value = defaultVal, TickStyle = TickStyle.None, BackColor = boxBg };
             trackBar.ValueChanged += (s, e) => valueLabel.Text = trackBar.Value.ToString();
             parent.Controls.Add(trackBar);
             y += 45;
+            return trackBar;
         }
         
-        private void AddSliderControl(Control parent, string label, int x, int y, out TrackBar trackBar, int min, int max, int defaultVal)
+        private TrackBar AddSliderControl(Control parent, string label, int x, int y, int min, int max, int defaultVal)
         {
             var labelCtrl = new Label { Text = label, Location = new Point(x, y), Size = new Size(140, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
             parent.Controls.Add(labelCtrl);
@@ -343,9 +344,10 @@ namespace NekoBeats
             var valueLabel = new Label { Text = defaultVal.ToString(), Location = new Point(x + 620, y), Size = new Size(70, 20), ForeColor = neonCyan, Font = new Font("Courier New", 9), TextAlign = ContentAlignment.TopRight };
             parent.Controls.Add(valueLabel);
             
-            trackBar = new TrackBar { Location = new Point(x + 150, y - 5), Size = new Size(460, 45), Minimum = min, Maximum = max, Value = defaultVal, TickStyle = TickStyle.None, BackColor = boxBg };
+            var trackBar = new TrackBar { Location = new Point(x + 150, y - 5), Size = new Size(460, 45), Minimum = min, Maximum = max, Value = defaultVal, TickStyle = TickStyle.None, BackColor = boxBg };
             trackBar.ValueChanged += (s, e) => valueLabel.Text = trackBar.Value.ToString();
             parent.Controls.Add(trackBar);
+            return trackBar;
         }
         
         private CheckBox AddCheckboxControl(Control parent, string label, int x, int y)
