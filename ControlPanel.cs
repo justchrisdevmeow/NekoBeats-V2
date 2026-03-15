@@ -127,7 +127,7 @@ namespace NekoBeats
             loadBtn.Click += (s, e) => { var dialog = new OpenFileDialog { Filter = "NekoBeats Preset (*.nbp)|*.nbp" }; if (dialog.ShowDialog() == DialogResult.OK) { visualizer.LoadPreset(dialog.FileName); } };
             footerPanel.Controls.Add(loadBtn);
             
-            var exitBtn = new Button { Text = "EXIT", Location = new Point(850, 12), Size = new Size(85, 31), BackColor = neonPurple, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 10, FontStyle.Bold), Cursor = Cursors.Hand };
+            var exitBtn = new Button { Text = "EXIT", Location = new Point(850, 12), Size = new Size(85, 31), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 10, FontStyle.Bold), Cursor = Cursors.Hand };
             exitBtn.Click += (s, e) => Environment.Exit(0);
             footerPanel.Controls.Add(exitBtn);
             
@@ -257,7 +257,7 @@ namespace NekoBeats
                     var windowGroup = CreateGroupBox("Window Settings", 10, y, 900, 220);
                     gy = 25;
                     
-                    var streamingBtn = new Button { Text = "Streaming Mode", Location = new Point(20, gy), Size = new Size(180, 32), BackColor = neonPurple, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand, Tag = false };
+                    var streamingBtn = new Button { Text = "Streaming Mode", Location = new Point(20, gy), Size = new Size(180, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand, Tag = false };
                     streamingBtn.Click += (s, e) => { bool isEnabled = (bool)streamingBtn.Tag; visualizer.SetStreamingMode(!isEnabled); streamingBtn.Tag = !isEnabled; streamingBtn.Text = !isEnabled ? "Streaming Mode: ON" : "Streaming Mode: OFF"; };
                     windowGroup.Controls.Add(streamingBtn);
                     gy += 45;
@@ -283,7 +283,7 @@ namespace NekoBeats
                     var presetsGroup = CreateGroupBox("Presets", 10, y, 900, 150);
                     gy = 25;
                     
-                    var loadBarBtn = new Button { Text = "Load Bar Theme", Location = new Point(20, gy), Size = new Size(180, 32), BackColor = neonPurple, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
+                    var loadBarBtn = new Button { Text = "Load Bar Theme", Location = new Point(20, gy), Size = new Size(180, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
                     loadBarBtn.Click += (s, e) => { var dialog = new OpenFileDialog { Filter = "NekoBeats Bar Preset (*.nbbar)|*.nbbar" }; if (dialog.ShowDialog() == DialogResult.OK) visualizer.Logic.LoadBarPreset(dialog.FileName); };
                     presetsGroup.Controls.Add(loadBarBtn);
                     
