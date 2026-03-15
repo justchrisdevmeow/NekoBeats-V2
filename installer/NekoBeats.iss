@@ -11,6 +11,7 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64
+UninstallDisplayIcon={app}\NekoBeats.exe
 SetupIconFile=NekoBeatsLogo.ico
 WizardImageFile=NekoBeatsBanner.bmp
 WizardImageStretch=yes
