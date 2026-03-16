@@ -12,8 +12,8 @@ namespace NekoBeats
         private static VisualizerForm mainForm;
         private static ControlPanel controlPanel;
         private static NotifyIcon trayIcon;
-        private const string CURRENT_VERSION = "2.2";
-        private const string UPDATE_CHECK_URL = "https://api.github.com/repos/justdev-chris/NekoBeats-V2/releases/tags/v2.3";
+        private const string CURRENT_VERSION = "2.3";
+        private const string UPDATE_CHECK_URL = "https://api.github.com/repos/justdev-chris/NekoBeats-V2/releases/tags/v2.4";
         
         [STAThread]
         static void Main()
@@ -76,7 +76,7 @@ namespace NekoBeats
                             mainForm.Invoke((Action)(() =>
                             {
                                 var result = MessageBox.Show(
-                                    "A new version of NekoBeats is available! (v2.3)\n\nWould you like to download it?\n\nYou can download it from: https://github.com/justdev-chris/NekoBeats-V2/releases",
+                                    "A new version of NekoBeats is available! (v2.4)\n\nWould you like to download it?\n\nYou can download it from: https://github.com/justdev-chris/NekoBeats-V2/releases",
                                     "NekoBeats Update",
                                     MessageBoxButtons.YesNo,
                                     MessageBoxIcon.Information
