@@ -77,7 +77,7 @@ namespace NekoBeats
             }
         }
 
-        private Color GetBarColor(float h, float clientHeight, int barIndex)
+        public Color GetBarColor(float h, float clientHeight, int barIndex)
         {
             // V2.3.2: Check gradient first
             if (useGradient && gradientColors != null && gradientColors.Length > 0)
@@ -106,7 +106,7 @@ namespace NekoBeats
             return fadeValues[barIndex];
         }
 
-        private Color ApplyOpacity(Color color)
+        public Color ApplyOpacity(Color color)
         {
             int alpha = (int)(255 * opacity);
             return Color.FromArgb(Math.Clamp(alpha, 0, 255), color.R, color.G, color.B);
