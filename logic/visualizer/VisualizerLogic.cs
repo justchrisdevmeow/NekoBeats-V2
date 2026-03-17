@@ -247,7 +247,7 @@ namespace NekoBeats
             barLogic.rainbowBars = rainbowBars;
             barLogic.circleRadius = circleRadius;
             barLogic.currentStyle = _animationStyle;
-            barLogic.currentTheme = barPreset?.BarShape == BarPreset.BarShape.Rectangle ? BarRenderer.BarTheme.Rectangle : BarRenderer.BarTheme.NeonTubes;
+            barLogic.currentTheme = barPreset != null ? BarRenderer.BarTheme.Rectangle : BarRenderer.BarTheme.NeonTubes;
             
             // V2.3.2: Pass gradient and fade to barLogic
             if (useGradient && gradientColors != null)
