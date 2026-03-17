@@ -231,32 +231,20 @@ private int fftPos = 0;
         barLogic.Update();
     }
     
-    public void Render(Graphics g, Size clientSize)
-    {
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        
-        // Render custom background first
-        RenderCustomBackground(g, clientSize);
-        
-        switch (_animationStyle)
-        {
-            case BarLogic.AnimationStyle.Bars:
-                barLogic.DrawBars(g, clientSize, opacity);
-                break;
-            case BarLogic.AnimationStyle.Waveform:
-                barLogic.DrawWaveform(g, clientSize, opacity);
-                break;
-            case BarLogic.AnimationStyle.Circle:
-                barLogic.DrawCircle(g, clientSize, opacity);
-                break;
-            case BarLogic.AnimationStyle.Particles:
-                if (particlesEnabled) DrawParticles(g, clientSize);
-                break;
-        }
-        
-        if (bloomEnabled)
-            ApplyBloomEffect(g, clientSize);
-    }
+public void Render(Graphics g, Size clientSize)
+{
+    g.SmoothingMode = SmoothingMode.AntiAlias;
+    
+    // Render custom background first
+    RenderCustomBackground(g, clientSize);
+    
+    // Let BarLogic handle all rendering
+    barLogic.Render(g, clientSize);
+    
+    if (bloomEnabled)
+        ApplyBloomEffect(g, clientSize);
+}
+
     
     private void DrawParticles(Graphics g, Size clientSize)
     {
