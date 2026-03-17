@@ -12,7 +12,6 @@ namespace NekoBeats
         private CheckBox rainbowCheck;
         private TrackBar spacingTrack;
         private ComboBox themeCombo;
-        private ComboBox styleCombo;
         private ComboBox fpsCombo;
         private TrackBar barCountTrack;
         private TrackBar barHeightTrack;
