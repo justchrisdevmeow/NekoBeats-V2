@@ -200,6 +200,19 @@ private VisualizerForm visualizer;
                 particleCountTrack = AddSliderControl(fxGroup, "Particle Count:", 20, gy, 10, 500, visualizer.Logic.particleCount);
                 particleCountTrack.ValueChanged += (s, e) => visualizer.Logic.particleCount = particleCountTrack.Value;
                 
+                 circleModeCheck = AddCheckboxControl(fxGroup, "Circle Mode", 20, gy);
+                 circleModeCheck.Checked = visualizer.Logic.animationStyle == BarLogic.AnimationStyle.Circle;
+                 circleModeCheck.CheckedChanged += (s, e) => visualizer.Logic.animationStyle = circleModeCheck.Checked ? BarLogic.AnimationStyle.Circle : BarLogic.AnimationStyle.Bars;
+                 gy += 35;
+
+                 fadeEffectCheck = AddCheckboxControl(fxGroup, "Fade Effect", 20, gy);
+                 fadeEffectCheck.Checked = visualizer.Logic.fadeEffectEnabled;
+                 fadeEffectCheck.CheckedChanged += (s, e) => visualizer.Logic.fadeEffectEnabled = fadeEffectCheck.Checked;
+                 gy += 35;
+
+                 fadeSpeedTrack = AddSliderControl(fxGroup, "Fade Speed:", 20, gy, 1, 100, (int)(visualizer.Logic.fadeEffectSpeed * 100));
+                 fadeSpeedTrack.ValueChanged += (s, e) => visualizer.Logic.fadeEffectSpeed = fadeSpeedTrack.Value / 100f;
+
                 currentTabPanel.Controls.Add(fxGroup);
                 break;
                 
