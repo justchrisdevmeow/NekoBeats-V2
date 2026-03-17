@@ -22,22 +22,39 @@ namespace NekoBeats
                 Directory.CreateDirectory(pluginsDirectory);
         }
 
-        public void LoadAllPlugins()
+public void LoadAllPlugins()
+{
+    try
+    {
+        // Show warning
+        var result = MessageBox.Show(
+            "WARNING: Only load plugins from trusted sources!\n\n" +
+            "Malicious plugins can harm your system.\n\n" +
+            "Continue loading plugins from the Plugins folder?",
+            "Plugin Security Warning",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning
+        );
+        
+        if (result == DialogResult.No)
         {
-            try
-            {
-                string[] dllFiles = Directory.GetFiles(pluginsDirectory, "*.nbplugin");
-
-                foreach (string dllPath in dllFiles)
-                {
-                    LoadPlugin(dllPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                host.Log($"Error loading plugins: {ex.Message}");
-            }
+            host.Log("Plugin loading cancelled by user");
+            return;
         }
+
+        string[] dllFiles = Directory.GetFiles(pluginsDirectory, "*.nbplugin");
+
+        foreach (string dllPath in dllFiles)
+        {
+            LoadPlugin(dllPath);
+        }
+    }
+    catch (Exception ex)
+    {
+        host.Log($"Error loading plugins: {ex.Message}");
+    }
+}
+
 
         public void LoadPlugin(string filePath)
         {
