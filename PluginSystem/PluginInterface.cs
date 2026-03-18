@@ -1,5 +1,5 @@
-// PluginInterface.cs
 using System;
+using System.Drawing;
 
 namespace NekoBeats.Plugins
 {
@@ -19,13 +19,13 @@ namespace NekoBeats.Plugins
     public interface INekoBeatsHost
     {
         void Log(string message);
-        void SetBarColor(int argb);
+        void SetBarColor(Color color);
         void SetOpacity(float opacity);
         void SetBarHeight(int height);
         void SetBarCount(int count);
         void SetCustomBackground(string imagePath);
         void ClearCustomBackground();
-        void ApplyGradient(int[] colorArgbs);
+        void ApplyGradient(Color[] colors);
         void SetLatencyCompensation(int milliseconds);
         void SetFadeEffect(bool enabled, float fadeSpeed);
         float GetAudioLevel();
