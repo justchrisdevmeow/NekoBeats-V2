@@ -1,258 +1,195 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using NekoBeats.Plugins;
+using DiscordRPC;
 
 namespace NekoBeats
 {
     static class Program
     {
-        private static VisualizerForm mainForm;
-        private static ControlPanel controlPanel;
-        private static NotifyIcon trayIcon;
-        private static PluginLoader pluginLoader;
         private const string CURRENT_VERSION = "2.3.2";
-        private const string UPDATE_CHECK_URL = "https://api.github.com/repos/justdev-chris/NekoBeats-V2/releases/tags/v2.4";
-        
+        private static DiscordRpcClient discordRpc;
+        private static VisualizerForm visualizerForm;
+        private static PluginLoader pluginLoader;
+
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
-            mainForm = new VisualizerForm();
-            controlPanel = new ControlPanel(mainForm);
-            controlPanel.Hide();
-            
-            // V2.3.2: Initialize plugin system
-            InitializePlugins();
-            
-            InitializeTrayIcon();
-            CheckForUpdates();
-            
-            Application.Run(mainForm);
-        }
-        
-        // V2.3.2 NEW METHOD
-        private static void InitializePlugins()
-        {
+
             try
             {
-                // Create a plugin host wrapper that implements INekoBeatsHost
-                var pluginHost = new NekoBeatsPluginHost(mainForm);
-                
-                // Initialize plugin loader
-                pluginLoader = new PluginLoader(pluginHost, "Plugins");
-                
-                // Load all plugins from Plugins directory
-                pluginLoader.LoadAllPlugins();
-                
-                // Get loaded plugins count
-                var loadedPlugins = pluginLoader.GetLoadedPlugins();
-                if (loadedPlugins.Count > 0)
-                {
-                    MessageBox.Show($"Loaded {loadedPlugins.Count} plugin(s)", "Plugins", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                InitializeDiscordRPC();
+                InitializeVisualizer();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error initializing plugins: {ex.Message}", "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Error: {ex.Message}", "NekoBeats Error");
+                ExitApplication();
+            }
+
+            Application.Run(visualizerForm);
+        }
+
+        private static void InitializeDiscordRPC()
+        {
+            try
+            {
+                discordRpc = new DiscordRpcClient("YOUR_APPLICATION_ID_HERE");
+                
+                discordRpc.OnReady += (user) =>
+                {
+                    Console.WriteLine($"Discord RPC Connected as {user.Username}");
+                };
+
+                discordRpc.OnConnectionEstablished += () =>
+                {
+                    UpdateDiscordStatus();
+                };
+
+                discordRpc.Initialize();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Discord RPC failed to initialize: {ex.Message}");
+                discordRpc = null;
             }
         }
-        
-        private static void InitializeTrayIcon()
+
+        private static void InitializeVisualizer()
         {
-            var trayMenu = new ContextMenuStrip();
-            trayMenu.Items.Add("Show Control Panel", null, (s, e) => ShowControlPanel());
-            trayMenu.Items.Add("Check for Updates", null, (s, e) => CheckForUpdates());
-            trayMenu.Items.Add(new ToolStripSeparator());
-            trayMenu.Items.Add("Exit NekoBeats", null, (s, e) => ExitApplication());
+            visualizerForm = new VisualizerForm();
             
-            Icon appIcon = mainForm.Icon;
+            pluginLoader = new PluginLoader(new NekoBeatsPluginHost(visualizerForm));
             
-            trayIcon = new NotifyIcon
+            var result = MessageBox.Show(
+                "Load plugins? (Security Warning: Only load plugins you trust)",
+                "NekoBeats Plugin System",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            if (result == DialogResult.Yes)
             {
-                Icon = appIcon,
-                Text = "NekoBeats Visualizer",
-                ContextMenuStrip = trayMenu,
-                Visible = true
-            };
-            
-            trayIcon.DoubleClick += (s, e) => ShowControlPanel();
-            
-            Application.ApplicationExit += (s, e) => {
-                if (trayIcon != null)
-                {
-                    trayIcon.Visible = false;
-                    trayIcon.Dispose();
-                }
-            };
+                pluginLoader.LoadAllPlugins();
+            }
+
+            visualizerForm.Show();
+            UpdateDiscordStatus();
         }
-        
-        private static void CheckForUpdates()
+
+        private static void UpdateDiscordStatus()
         {
-            Task.Run(async () =>
+            if (discordRpc == null) return;
+
+            try
             {
-                try
+                discordRpc.SetPresence(new RichPresence()
                 {
-                    using (HttpClient client = new HttpClient())
+                    Details = "Visualizing Audio",
+                    State = "Playing with NekoBeats v" + CURRENT_VERSION,
+                    Assets = new Assets()
                     {
-                        client.DefaultRequestHeaders.Add("User-Agent", "NekoBeats");
-                        var response = await client.GetAsync(UPDATE_CHECK_URL);
-                        
-                        if (response.IsSuccessStatusCode)
-                        {
-                            mainForm.Invoke((Action)(() =>
-                            {
-                                var result = MessageBox.Show(
-                                    "A new version of NekoBeats is available! (v2.4)\n\nWould you like to download it?\n\nYou can download it from: https://github.com/justdev-chris/NekoBeats-V2/releases",
-                                    "NekoBeats Update",
-                                    MessageBoxButtons.YesNo,
-                                    MessageBoxIcon.Information
-                                );
-                                
-                                if (result == DialogResult.Yes)
-                                {
-                                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                                    {
-                                        FileName = "https://github.com/justdev-chris/NekoBeats-V2/releases",
-                                        UseShellExecute = true
-                                    });
-                                }
-                            }));
-                        }
-                    }
-                }
-                catch
-                {
-                    // Silent fail - don't bother user if check fails
-                }
-            });
-        }
-        
-        private static void ShowControlPanel()
-        {
-            if (controlPanel == null || controlPanel.IsDisposed)
-            {
-                controlPanel = new ControlPanel(mainForm);
+                        LargeImageKey = "nekobeats_logo",
+                        LargeImageText = "NekoBeats Audio Visualizer v" + CURRENT_VERSION
+                    },
+                    Timestamps = Timestamps.Now
+                });
             }
-            
-            controlPanel.Show();
-            controlPanel.WindowState = FormWindowState.Normal;
-            controlPanel.BringToFront();
-            controlPanel.Focus();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to update Discord status: {ex.Message}");
+            }
         }
-        
+
         private static void ExitApplication()
         {
-            // V2.3.2: Unload all plugins before exit
-            if (pluginLoader != null)
+            try
             {
-                pluginLoader.UnloadAllPlugins();
+                pluginLoader?.UnloadAllPlugins();
+                discordRpc?.Dispose();
+                visualizerForm?.Dispose();
             }
-            
-            if (trayIcon != null)
+            catch (Exception ex)
             {
-                trayIcon.Visible = false;
-                trayIcon.Dispose();
+                Console.WriteLine($"Error during shutdown: {ex.Message}");
             }
-            
-            if (controlPanel != null && !controlPanel.IsDisposed)
-                controlPanel.Close();
-            
-            if (mainForm != null && !mainForm.IsDisposed)
-                mainForm.Close();
-            
+
             Application.Exit();
         }
     }
-    
-    // V2.3.2 NEW CLASS - Plugin host wrapper
+
     public class NekoBeatsPluginHost : INekoBeatsHost
     {
-        private VisualizerForm form;
-        
-        public NekoBeatsPluginHost(VisualizerForm visualizerForm)
+        private VisualizerForm visualizerForm;
+
+        public NekoBeatsPluginHost(VisualizerForm form)
         {
-            form = visualizerForm;
+            visualizerForm = form;
         }
-        
+
         public void Log(string message)
         {
-            System.Diagnostics.Debug.WriteLine($"[NekoBeats Plugin] {message}");
+            Console.WriteLine($"[Plugin] {message}");
         }
-        
-        public void SetBarColor(int argb)
+
+        public void SetBarColor(Color color)
         {
-            form.Logic.barColor = Color.FromArgb(argb);
+            visualizerForm.Logic.barColor = color;
         }
-        
+
         public void SetOpacity(float opacity)
         {
-            form.Logic.opacity = Math.Max(0, Math.Min(1.0f, opacity));
+            visualizerForm.Logic.opacity = Math.Clamp(opacity, 0f, 1f);
         }
-        
+
         public void SetBarHeight(int height)
         {
-            form.Logic.barHeight = Math.Max(20, Math.Min(400, height));
+            visualizerForm.Logic.barHeight = Math.Max(10, height);
         }
-        
+
         public void SetBarCount(int count)
         {
-            form.Logic.barCount = Math.Max(32, Math.Min(512, count));
+            visualizerForm.Logic.barCount = Math.Clamp(count, 32, 512);
         }
-        
+
         public void SetCustomBackground(string imagePath)
         {
-            form.SetCustomBackground(imagePath);
+            visualizerForm.Logic.SetCustomBackground(imagePath);
         }
-        
+
         public void ClearCustomBackground()
         {
-            form.ClearCustomBackground();
+            visualizerForm.Logic.ClearCustomBackground();
         }
-        
-        public void ApplyGradient(int[] colorArgbs)
+
+        public void ApplyGradient(Color[] colors)
         {
-            if (colorArgbs == null || colorArgbs.Length == 0)
-            {
-                form.Logic.ClearGradient();
-                return;
-            }
-            
-            Color[] colors = new Color[colorArgbs.Length];
-            for (int i = 0; i < colorArgbs.Length; i++)
-            {
-                colors[i] = Color.FromArgb(colorArgbs[i]);
-            }
-            form.Logic.ApplyGradient(colors);
+            visualizerForm.Logic.ApplyGradient(colors);
         }
-        
+
         public void SetLatencyCompensation(int milliseconds)
         {
-            form.Logic.SetLatencyCompensation(milliseconds);
+            visualizerForm.Logic.SetLatencyCompensation(milliseconds);
         }
-        
-        public void SetFadeEffect(bool enabled, float fadeSpeed)
+
+        public void SetFadeEffect(bool enabled, float speed)
         {
-            form.Logic.SetFadeEffect(enabled, fadeSpeed);
+            visualizerForm.Logic.SetFadeEffect(enabled, speed);
         }
-        
+
         public float GetAudioLevel()
         {
             float sum = 0;
-            int count = Math.Min(12, form.Logic.barCount);
+            int count = Math.Min(12, visualizerForm.Logic.barCount);
             for (int i = 0; i < count; i++)
-                sum += form.Logic.smoothedBarValues[i];
+                sum += visualizerForm.Logic.smoothedBarValues[i];
             return sum / count;
         }
-        
+
         public int GetCurrentFPS()
         {
-            return form.Logic.fpsLimit;
+            return visualizerForm.Logic.fpsLimit;
         }
     }
 }
