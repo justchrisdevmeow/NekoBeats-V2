@@ -20,6 +20,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     
+    - name: Add NuGet package - DiscordRichPresence
+      run: dotnet add package DiscordRichPresence
+    
     - name: Build
       run: dotnet publish -c Release -f net8.0-windows -r win-x64 --self-contained true
     
@@ -39,7 +42,7 @@ jobs:
     - name: Upload Installer
       uses: actions/upload-artifact@v4
       with:
-        name: NekoBeats-2.3-installer
+        name: NekoBeats-2.3.2-installer
         path: D:\a\NekoBeats-V2\NekoBeats-V2\installer\installer\NekoBeats-2.3.2-installer.exe
     
     - name: Upload Build Output
