@@ -28,7 +28,7 @@ jobs:
     
     - name: Convert images with ImageMagick
       run: |
-        magick installer/Banner.bmp -type truecolor -define bmp:format=bmp3 installer/NekoBeatsBanner.bmp
+        magick installer/Your paragraph text.png -type truecolor -define bmp:format=bmp3 installer/NekoBeatsBanner.bmp
         magick installer/Header.bmp -type truecolor -define bmp:format=bmp3 installer/NekoBeatsHeader.bmp
     
     - name: Install Inno Setup
