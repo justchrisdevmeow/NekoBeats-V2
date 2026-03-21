@@ -42,12 +42,13 @@ namespace NekoBeats
         
         private Panel currentTabPanel;
         
-        public ControlPanel(VisualizerForm visualizer)
-        {
-            this.visualizer = visualizer;
-            this.Icon = visualizer.Icon;
-            InitializeComponents();
-        }
+        public ControlPanel(VisualizerForm visualizer, PluginLoader loader)
+{
+    this.visualizer = visualizer;
+    this.pluginLoader = loader;
+    InitializeComponents();
+}
+
         
         private void InitializeComponents()
         {
