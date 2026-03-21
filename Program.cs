@@ -117,7 +117,7 @@ namespace NekoBeats
                     controlPanel.Hide();
                 }
             };
-
+            controlPanel.Show();
             visualizerForm.Show();
         }
 
