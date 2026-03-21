@@ -336,36 +336,45 @@ namespace NekoBeats
     presetsGroup.Controls.Add(pluginLabel);
     gy += 30;
     
-    var loadedPlugins = pluginLoader.GetLoadedPlugins();
-    if (loadedPlugins.Count > 0)
+    if (pluginLoader != null)
     {
-        foreach (var plugin in loadedPlugins)
+        var loadedPlugins = pluginLoader.GetLoadedPlugins();
+        if (loadedPlugins.Count > 0)
         {
-            var checkbox = new CheckBox 
-            { 
-                Text = $"{plugin.Name} v{plugin.Version}", 
-                Location = new Point(20, gy), 
-                Size = new Size(400, 25), 
-                ForeColor = neonCyan, 
-                BackColor = boxBg, 
-                Font = new Font("Courier New", 9), 
-                Checked = true,
-                Tag = plugin
-            };
-            checkbox.CheckedChanged += (s, e) => 
+            foreach (var plugin in loadedPlugins)
             {
-                if (checkbox.Checked)
-                    plugin.OnEnable();
-                else
-                    plugin.OnDisable();
-            };
-            presetsGroup.Controls.Add(checkbox);
+                var checkbox = new CheckBox 
+                { 
+                    Text = $"{plugin.Name} v{plugin.Version}", 
+                    Location = new Point(20, gy), 
+                    Size = new Size(400, 25), 
+                    ForeColor = neonCyan, 
+                    BackColor = boxBg, 
+                    Font = new Font("Courier New", 9), 
+                    Checked = true,
+                    Tag = plugin
+                };
+                checkbox.CheckedChanged += (s, e) => 
+                {
+                    if (checkbox.Checked)
+                        plugin.OnEnable();
+                    else
+                        plugin.OnDisable();
+                };
+                presetsGroup.Controls.Add(checkbox);
+                gy += 30;
+            }
+        }
+        else
+        {
+            var noPluginsLabel = new Label { Text = "No plugins loaded", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+            presetsGroup.Controls.Add(noPluginsLabel);
             gy += 30;
         }
     }
     else
     {
-        var noPluginsLabel = new Label { Text = "No plugins loaded", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+        var noPluginsLabel = new Label { Text = "Plugin loader not initialized", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
         presetsGroup.Controls.Add(noPluginsLabel);
         gy += 30;
     }
@@ -425,6 +434,7 @@ namespace NekoBeats
     
     currentTabPanel.Controls.Add(presetsGroup);
     break;
+
 
                     
                 case "CREDITS":
