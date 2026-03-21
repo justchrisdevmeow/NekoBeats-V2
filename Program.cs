@@ -62,7 +62,8 @@ namespace NekoBeats
         private static void InitializeVisualizer()
         {
             visualizerForm = new VisualizerForm();
-            controlPanel = new ControlPanel(visualizerForm);
+            controlPanel = new ControlPanel(visualizerForm, pluginLoader);
+
             
             pluginLoader = new PluginLoader(new NekoBeatsPluginHost(visualizerForm));
             
