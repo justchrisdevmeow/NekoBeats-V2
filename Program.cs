@@ -21,6 +21,7 @@ namespace NekoBeats
         private static ControlPanel controlPanel;
         private static PluginLoader pluginLoader;
         private static NotifyIcon trayIcon;
+        private static Icon nekoIcon;
 
         [STAThread]
         static void Main()
@@ -30,6 +31,7 @@ namespace NekoBeats
 
             try
             {
+                LoadIcon();
                 InitializeDiscordRPC();
                 InitializeVisualizer();
                 InitializeSystemTray();
@@ -42,6 +44,25 @@ namespace NekoBeats
             }
 
             Application.Run(visualizerForm);
+        }
+
+        private static void LoadIcon()
+        {
+            try
+            {
+                if (System.IO.File.Exists("NekoBeatsLogo.ico"))
+                {
+                    nekoIcon = new Icon("NekoBeatsLogo.ico");
+                }
+                else
+                {
+                    nekoIcon = SystemIcons.Application;
+                }
+            }
+            catch
+            {
+                nekoIcon = SystemIcons.Application;
+            }
         }
 
         private static void InitializeDiscordRPC()
@@ -61,9 +82,8 @@ namespace NekoBeats
 
         private static void InitializeVisualizer()
         {
-            visualizerForm = new VisualizerForm(pluginLoader);
-            controlPanel = new ControlPanel(visualizerForm, pluginLoader);
-
+            visualizerForm = new VisualizerForm(null);
+            visualizerForm.Icon = nekoIcon;
             
             pluginLoader = new PluginLoader(new NekoBeatsPluginHost(visualizerForm));
             
@@ -79,20 +99,19 @@ namespace NekoBeats
                 pluginLoader.LoadAllPlugins();
             }
 
+            visualizerForm = new VisualizerForm(pluginLoader);
+            visualizerForm.Icon = nekoIcon;
+            
+            controlPanel = new ControlPanel(visualizerForm, pluginLoader);
+            controlPanel.Icon = nekoIcon;
+
             visualizerForm.Show();
         }
 
         private static void InitializeSystemTray()
         {
             trayIcon = new NotifyIcon();
-            trayIcon.Icon = SystemIcons.Application;
-            
-            if (System.IO.File.Exists("NekoBeatsLogo.ico"))
-            {
-                try { trayIcon.Icon = new Icon("NekoBeatsLogo.ico"); }
-                catch { }
-            }
-
+            trayIcon.Icon = nekoIcon;
             trayIcon.Visible = true;
             trayIcon.Text = "NekoBeats v" + CURRENT_VERSION;
 
@@ -158,10 +177,6 @@ namespace NekoBeats
                                         OpenReleasesPage();
                                     }
                                 }
-                                else
-                                {
-                                    MessageBox.Show("You are on the latest version!", "NekoBeats", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                }
                             }
                         }
                     }
@@ -222,6 +237,7 @@ namespace NekoBeats
                 discordRpc?.Dispose();
                 controlPanel?.Dispose();
                 visualizerForm?.Dispose();
+                nekoIcon?.Dispose();
             }
             catch (Exception ex)
             {
