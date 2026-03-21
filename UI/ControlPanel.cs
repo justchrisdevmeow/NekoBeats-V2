@@ -326,28 +326,104 @@ namespace NekoBeats
                     break;
                     
                 case "PRESETS":
-                    var nbpGroup = CreateGroupBox("NBP - Visualizer Settings", 10, y, 900, 130);
-                    gy = 25;
-                    
-                    var saveNbpBtn = new Button { Text = "Save Settings", Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
-                    saveNbpBtn.Click += (s, e) => { var dialog = new SaveFileDialog { Filter = "NekoBeats Preset (*.nbp)|*.nbp" }; if (dialog.ShowDialog() == DialogResult.OK) { visualizer.SavePreset(dialog.FileName); MessageBox.Show("Settings saved!"); } };
-                    nbpGroup.Controls.Add(saveNbpBtn);
-                    
-                    var loadNbpBtn = new Button { Text = "Load Settings", Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
-                    loadNbpBtn.Click += (s, e) => { var dialog = new OpenFileDialog { Filter = "NekoBeats Preset (*.nbp)|*.nbp" }; if (dialog.ShowDialog() == DialogResult.OK) { visualizer.LoadPreset(dialog.FileName); MessageBox.Show("Settings loaded!"); } };
-                    nbpGroup.Controls.Add(loadNbpBtn);
-                    
-                    currentTabPanel.Controls.Add(nbpGroup);
-                    
-                    var nbbarGroup = CreateGroupBox("NBBAR - Bar Presets", 10, y + 140, 900, 80);
-                    gy = 25;
-                    
-                    var loadBarBtn = new Button { Text = "Load Bar Theme", Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
-                    loadBarBtn.Click += (s, e) => { var dialog = new OpenFileDialog { Filter = "NekoBeats Bar Preset (*.nbbar)|*.nbbar" }; if (dialog.ShowDialog() == DialogResult.OK) { visualizer.Logic.LoadBarPreset(dialog.FileName); MessageBox.Show("Bar theme loaded!"); } };
-                    nbbarGroup.Controls.Add(loadBarBtn);
-                    
-                    currentTabPanel.Controls.Add(nbbarGroup);
-                    break;
+    var presetsGroup = CreateGroupBox("Presets & Plugins", 10, y, 900, 650);
+    gy = 25;
+    
+    // Plugin Manager
+    var pluginLabel = new Label { Text = "Plugins", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
+    presetsGroup.Controls.Add(pluginLabel);
+    gy += 30;
+    
+    var loadedPlugins = pluginLoader.GetLoadedPlugins();
+    if (loadedPlugins.Count > 0)
+    {
+        foreach (var plugin in loadedPlugins)
+        {
+            var checkbox = new CheckBox 
+            { 
+                Text = $"{plugin.Name} v{plugin.Version}", 
+                Location = new Point(20, gy), 
+                Size = new Size(400, 25), 
+                ForeColor = neonCyan, 
+                BackColor = boxBg, 
+                Font = new Font("Courier New", 9), 
+                Checked = true,
+                Tag = plugin
+            };
+            checkbox.CheckedChanged += (s, e) => 
+            {
+                if (checkbox.Checked)
+                    plugin.OnEnable();
+                else
+                    plugin.OnDisable();
+            };
+            presetsGroup.Controls.Add(checkbox);
+            gy += 30;
+        }
+    }
+    else
+    {
+        var noPluginsLabel = new Label { Text = "No plugins loaded", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+        presetsGroup.Controls.Add(noPluginsLabel);
+        gy += 30;
+    }
+    
+    // NBP Presets
+    var nbpLabel = new Label { Text = "NBP Presets (Settings)", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
+    presetsGroup.Controls.Add(nbpLabel);
+    gy += 30;
+    
+    string presetsPath = "Presets";
+    if (Directory.Exists(presetsPath))
+    {
+        var nbpFiles = Directory.GetFiles(presetsPath, "*.nbp");
+        if (nbpFiles.Length > 0)
+        {
+            foreach (var file in nbpFiles)
+            {
+                string presetName = Path.GetFileNameWithoutExtension(file);
+                var checkbox = new CheckBox { Text = presetName, Location = new Point(20, gy), Size = new Size(400, 25), ForeColor = neonCyan, BackColor = boxBg, Font = new Font("Courier New", 9), Checked = false };
+                presetsGroup.Controls.Add(checkbox);
+                gy += 30;
+            }
+        }
+        else
+        {
+            var noNBPLabel = new Label { Text = "No NBP presets found", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+            presetsGroup.Controls.Add(noNBPLabel);
+            gy += 30;
+        }
+    }
+    
+    // NBBAR Presets
+    var nbbarLabel = new Label { Text = "NBBAR Presets (Bar Themes)", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
+    presetsGroup.Controls.Add(nbbarLabel);
+    gy += 30;
+    
+    if (Directory.Exists(presetsPath))
+    {
+        var nbbarFiles = Directory.GetFiles(presetsPath, "*.nbbar");
+        if (nbbarFiles.Length > 0)
+        {
+            foreach (var file in nbbarFiles)
+            {
+                string presetName = Path.GetFileNameWithoutExtension(file);
+                var checkbox = new CheckBox { Text = presetName, Location = new Point(20, gy), Size = new Size(400, 25), ForeColor = neonCyan, BackColor = boxBg, Font = new Font("Courier New", 9), Checked = false };
+                presetsGroup.Controls.Add(checkbox);
+                gy += 30;
+            }
+        }
+        else
+        {
+            var noNBBARLabel = new Label { Text = "No NBBAR presets found", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+            presetsGroup.Controls.Add(noNBBARLabel);
+            gy += 30;
+        }
+    }
+    
+    currentTabPanel.Controls.Add(presetsGroup);
+    break;
+
                     
                 case "CREDITS":
                     var creditsGroup = CreateGroupBox("About", 10, y, 900, 280);
