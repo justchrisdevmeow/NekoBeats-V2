@@ -33,7 +33,7 @@ private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
         InitializeLogic();
         InitializeTimer();
         
-        controlPanel = new ControlPanel(this);
+        controlPanel = new ControlPanel(this, pluginLoader);
         controlPanel.Show();
     }
     
