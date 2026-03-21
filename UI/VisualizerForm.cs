@@ -21,6 +21,8 @@ private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
     private VisualizerLogic logic;
     private Timer renderTimer;
     private ControlPanel controlPanel;
+    private PluginLoader pluginLoader;
+
     
     private Point dragStart;
     private bool isDragging = false;
