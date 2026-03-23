@@ -42,11 +42,11 @@ jobs:
     - name: Upload Installer
       uses: actions/upload-artifact@v4
       with:
-        name: NekoBeats-2.3.2-installer
-        path: D:\a\NekoBeats-V2\NekoBeats-V2\installer\installer\NekoBeats-2.3.2-installer.exe
+        name: NekoBeats-2.3.3-installer
+        path: D:\a\NekoBeats-V2\NekoBeats-V2\installer\installer\NekoBeats-2.3.3-installer.exe
     
     - name: Upload Build Output
       uses: actions/upload-artifact@v4
       with:
-        name: NekoBeats-2.3.2-build
+        name: NekoBeats-2.3.3-build
         path: bin/Release/net8.0-windows/win-x64/publish/
