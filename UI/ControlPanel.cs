@@ -489,7 +489,7 @@ namespace NekoBeats
     creditsGroup.Controls.Add(createdLabel);
     gy += 35;
 
-    var versionLabel = new Label { Text = "NekoBeats V2.3.2", Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = dimText, Font = new Font("Courier New", 10), AutoSize = false };
+    var versionLabel = new Label { Text = "NekoBeats V2.3.3", Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = dimText, Font = new Font("Courier New", 10), AutoSize = false };
     creditsGroup.Controls.Add(versionLabel);
     gy += 35;
 
