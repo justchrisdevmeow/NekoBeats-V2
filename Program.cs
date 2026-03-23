@@ -177,7 +177,7 @@ namespace NekoBeats
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Add("User-Agent", "NekoBeats");
-                        HttpResponseMessage response = awaít client.GetAsync(GITHUB_API_URL);
+                        HttpResponseMessage response = await client.GetAsync(GITHUB_API_URL);
 
                         if (response.IsSuccessStatusCode)
                         {
