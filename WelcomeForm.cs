@@ -141,7 +141,7 @@ namespace NekoBeats
 
         private Panel CreateWelcomePage()
         {
-            var panel = new Panel { Dock = DockStyle.Fill, BackColor = bg };
+            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
 
             try
             {
@@ -179,7 +179,7 @@ namespace NekoBeats
 
         private Panel CreateTutPage1()
         {
-            var panel = new Panel { Dock = DockStyle.Fill, BackColor = bg };
+            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
 
             AddLabel(panel, "🎵 Getting Started", new Point(30, 30), new Size(520, 35),
                 new Font("Courier New", 14, FontStyle.Bold), accent, ContentAlignment.MiddleLeft);
@@ -196,7 +196,7 @@ namespace NekoBeats
 
         private Panel CreateTutPage2()
         {
-            var panel = new Panel { Dock = DockStyle.Fill, BackColor = bg };
+            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
 
             AddLabel(panel, "🎨 Customization", new Point(30, 30), new Size(520, 35),
                 new Font("Courier New", 14, FontStyle.Bold), accent, ContentAlignment.MiddleLeft);
@@ -224,7 +224,7 @@ namespace NekoBeats
 
         private Panel CreateTutPage3()
         {
-            var panel = new Panel { Dock = DockStyle.Fill, BackColor = bg };
+            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
 
             AddLabel(panel, "💡 Tips & Tricks", new Point(30, 30), new Size(520, 35),
                 new Font("Courier New", 14, FontStyle.Bold), accent, ContentAlignment.MiddleLeft);
@@ -242,7 +242,7 @@ namespace NekoBeats
 
         private Panel CreateFinishPage()
         {
-            var panel = new Panel { Dock = DockStyle.Fill, BackColor = bg };
+            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
 
             AddLabel(panel, "You're all set! 🐱✨", new Point(0, 120), new Size(580, 45),
                 new Font("Courier New", 16, FontStyle.Bold), accent, ContentAlignment.MiddleCenter);
