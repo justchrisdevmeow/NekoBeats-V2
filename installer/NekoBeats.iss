@@ -1,12 +1,12 @@
 [Setup]
 AppName=NekoBeats
-AppVersion=2.3.2
+AppVersion=2.3.3
 AppPublisher=justdev-chris
 AppPublisherURL=https://github.com/justdev-chris/NekoBeats-V2
 DefaultDirName={pf}\NekoBeats
 DefaultGroupName=NekoBeats
 OutputDir=installer
-OutputBaseFilename=NekoBeats-2.3.2-installer
+OutputBaseFilename=NekoBeats-2.3.3-installer
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
