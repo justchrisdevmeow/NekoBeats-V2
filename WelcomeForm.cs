@@ -30,7 +30,7 @@ namespace NekoBeats
         private void InitializeComponents()
         {
             this.Text = "Welcome to NekoBeats";
-            this.Size = new Size(600, 520);
+            this.Size = new Size(620, 560);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = bg;
             this.ForeColor = Color.White;
@@ -61,11 +61,23 @@ namespace NekoBeats
             }
             pages[0].Visible = true;
 
-            // don't show again checkbox
+            // page indicator
+            pageIndicator = new Label
+            {
+                Text = "1 / 5",
+                Location = new Point(0, 460),
+                Size = new Size(620, 20),
+                ForeColor = dimText,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Courier New", 9)
+            };
+            this.Controls.Add(pageIndicator);
+
+            // don't show again
             dontShowCheck = new CheckBox
             {
                 Text = "Don't show this again",
-                Location = new Point(20, 428),
+                Location = new Point(20, 490),
                 Size = new Size(200, 25),
                 ForeColor = dimText,
                 BackColor = bg,
@@ -73,11 +85,12 @@ namespace NekoBeats
             };
             this.Controls.Add(dontShowCheck);
 
+            // back button — LEFT side
             backBtn = new Button
             {
                 Text = "◀ BACK",
-                Location = new Point(270, 420),
-                Size = new Size(100, 35),
+                Location = new Point(250, 487),
+                Size = new Size(100, 32),
                 BackColor = Color.FromArgb(30, 30, 40),
                 ForeColor = dimText,
                 FlatStyle = FlatStyle.Flat,
@@ -89,11 +102,12 @@ namespace NekoBeats
             backBtn.Click += (s, e) => NavigatePage(-1);
             this.Controls.Add(backBtn);
 
+            // next button — RIGHT side
             nextBtn = new Button
             {
                 Text = "NEXT ▶",
-                Location = new Point(480, 420),
-                Size = new Size(100, 35),
+                Location = new Point(490, 487),
+                Size = new Size(100, 32),
                 BackColor = accent,
                 ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
@@ -103,17 +117,6 @@ namespace NekoBeats
             nextBtn.FlatAppearance.BorderColor = accent;
             nextBtn.Click += (s, e) => NavigatePage(1);
             this.Controls.Add(nextBtn);
-
-            pageIndicator = new Label
-            {
-                Text = "1 / 5",
-                Location = new Point(0, 395),
-                Size = new Size(600, 20),
-                ForeColor = dimText,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font("Courier New", 9)
-            };
-            this.Controls.Add(pageIndicator);
         }
 
         private void NavigatePage(int direction)
@@ -136,12 +139,17 @@ namespace NekoBeats
 
             backBtn.Visible = currentPage > 0;
             nextBtn.Text = currentPage == pages.Length - 1 ? "LET'S GO! 🐱" : "NEXT ▶";
-            pageIndicator.Text = $"{currentPage + 1} / {pages.Length}";
+            pageIndicator.Text = $"{currentPage + 1} / 5";
         }
 
         private Panel CreateWelcomePage()
         {
-            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
+            var panel = new Panel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(610, 450),
+                BackColor = bg
+            };
 
             try
             {
@@ -151,8 +159,8 @@ namespace NekoBeats
                     {
                         Image = Image.FromFile("NekoBeatsLogo.png"),
                         SizeMode = PictureBoxSizeMode.Zoom,
-                        Location = new Point(220, 30),
-                        Size = new Size(140, 140),
+                        Location = new Point(230, 20),
+                        Size = new Size(130, 130),
                         BackColor = Color.Transparent
                     };
                     panel.Controls.Add(logo);
@@ -160,18 +168,18 @@ namespace NekoBeats
             }
             catch { }
 
-            AddLabel(panel, "Welcome to NekoBeats! 🐱", new Point(0, 185), new Size(580, 40),
+            AddLabel(panel, "Welcome to NekoBeats! 🐱", new Point(0, 165), new Size(600, 40),
                 new Font("Courier New", 18, FontStyle.Bold), accent, ContentAlignment.MiddleCenter);
 
-            AddLabel(panel, "v2.3.3", new Point(0, 230), new Size(580, 25),
+            AddLabel(panel, "v2.3.3", new Point(0, 210), new Size(600, 25),
                 new Font("Courier New", 10), dimText, ContentAlignment.MiddleCenter);
 
             AddLabel(panel, "A sleek audio visualizer that turns your music\ninto floating light bars.",
-                new Point(60, 265), new Size(460, 50),
+                new Point(60, 245), new Size(480, 50),
                 new Font("Courier New", 10), Color.White, ContentAlignment.MiddleCenter);
 
             AddLabel(panel, "Let's get you set up! ✨",
-                new Point(0, 330), new Size(580, 25),
+                new Point(0, 310), new Size(600, 25),
                 new Font("Courier New", 10), dimText, ContentAlignment.MiddleCenter);
 
             return panel;
@@ -179,16 +187,21 @@ namespace NekoBeats
 
         private Panel CreateTutPage1()
         {
-            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
+            var panel = new Panel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(610, 450),
+                BackColor = bg
+            };
 
-            AddLabel(panel, "🎵 Getting Started", new Point(30, 30), new Size(520, 35),
+            AddLabel(panel, "🎵 Getting Started", new Point(30, 20), new Size(540, 35),
                 new Font("Courier New", 14, FontStyle.Bold), accent, ContentAlignment.MiddleLeft);
 
             AddLabel(panel, "1. Play some music through your speakers or headphones.\n\n" +
                 "2. NekoBeats automatically captures your system audio — no setup needed!\n\n" +
                 "3. The floating bars will appear on your screen, reacting to the music in real time.\n\n" +
                 "4. The control panel lets you customize everything — colors, bar count, height, effects and more.",
-                new Point(30, 90), new Size(520, 280),
+                new Point(30, 70), new Size(540, 280),
                 new Font("Courier New", 10), Color.White, ContentAlignment.TopLeft);
 
             return panel;
@@ -196,9 +209,14 @@ namespace NekoBeats
 
         private Panel CreateTutPage2()
         {
-            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
+            var panel = new Panel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(610, 450),
+                BackColor = bg
+            };
 
-            AddLabel(panel, "🎨 Customization", new Point(30, 30), new Size(520, 35),
+            AddLabel(panel, "🎨 Customization", new Point(30, 20), new Size(540, 35),
                 new Font("Courier New", 14, FontStyle.Bold), accent, ContentAlignment.MiddleLeft);
 
             string[] tips = new string[]
@@ -208,13 +226,13 @@ namespace NekoBeats
                 "FX tab — bloom, particles, circle mode, fade effect",
                 "AUDIO tab — sensitivity, smooth speed, latency comp",
                 "WINDOW tab — click-through, streaming mode, FPS limit",
-                "PRESETS tab — load .nbp and .nbbar preset files by setting a '/Presets'"
+                "PRESETS tab — load .nbp and .nbbar preset files"
             };
 
-            int y = 90;
+            int y = 75;
             foreach (var tip in tips)
             {
-                AddLabel(panel, $"• {tip}", new Point(30, y), new Size(520, 25),
+                AddLabel(panel, $"• {tip}", new Point(30, y), new Size(540, 25),
                     new Font("Courier New", 9), Color.White, ContentAlignment.MiddleLeft);
                 y += 38;
             }
@@ -224,9 +242,14 @@ namespace NekoBeats
 
         private Panel CreateTutPage3()
         {
-            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
+            var panel = new Panel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(610, 450),
+                BackColor = bg
+            };
 
-            AddLabel(panel, "💡 Tips & Tricks", new Point(30, 30), new Size(520, 35),
+            AddLabel(panel, "💡 Tips & Tricks", new Point(30, 20), new Size(540, 35),
                 new Font("Courier New", 14, FontStyle.Bold), accent, ContentAlignment.MiddleLeft);
 
             AddLabel(panel, "• Enable Click-Through so bars don't block your mouse\n\n" +
@@ -234,7 +257,7 @@ namespace NekoBeats
                 "• The system tray icon lets you show/hide the control panel\n\n" +
                 "• Check for updates anytime via the tray icon menu\n\n" +
                 "• Share your presets at catsdevs.online/NekoBeats-V2/community-themes.html",
-                new Point(30, 90), new Size(520, 280),
+                new Point(30, 70), new Size(540, 280),
                 new Font("Courier New", 10), Color.White, ContentAlignment.TopLeft);
 
             return panel;
@@ -242,13 +265,18 @@ namespace NekoBeats
 
         private Panel CreateFinishPage()
         {
-            var panel = new Panel { Location = new Point(0, 0), Size = new Size(590, 450), BackColor = bg };
+            var panel = new Panel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(610, 450),
+                BackColor = bg
+            };
 
-            AddLabel(panel, "You're all set! 🐱✨", new Point(0, 120), new Size(580, 45),
+            AddLabel(panel, "You're all set! 🐱✨", new Point(0, 120), new Size(600, 45),
                 new Font("Courier New", 16, FontStyle.Bold), accent, ContentAlignment.MiddleCenter);
 
             AddLabel(panel, "Play some music and watch the magic happen!\n\nMade with ❤️ by justdev-chris",
-                new Point(60, 200), new Size(460, 80),
+                new Point(60, 200), new Size(480, 80),
                 new Font("Courier New", 10), Color.White, ContentAlignment.MiddleCenter);
 
             return panel;
