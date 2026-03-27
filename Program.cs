@@ -83,7 +83,16 @@ namespace NekoBeats
             var tempForm = new VisualizerForm(null);
             tempForm.Icon = nekoIcon;
 
-            pluginLoader = new PluginLoader(new NekoBeatsPluginHost(tempForm));
+            // create control panel first so plugin host can reference it
+            visualizerForm = new VisualizerForm(null);
+            visualizerForm.Icon = nekoIcon;
+
+            controlPanel = new ControlPanel(visualizerForm, null);
+            controlPanel.Icon = nekoIcon;
+
+            // now create plugin host with both visualizer and control panel
+            var pluginHost = new NekoBeatsPluginHost(visualizerForm, controlPanel);
+            pluginLoader = new PluginLoader(pluginHost);
 
             var result = MessageBox.Show(
                 "Load plugins? (Security Warning: Only load plugins you trust)",
@@ -97,9 +106,12 @@ namespace NekoBeats
 
             tempForm.Dispose();
 
+            // recreate with plugin loader
+            visualizerForm.Dispose();
             visualizerForm = new VisualizerForm(pluginLoader);
             visualizerForm.Icon = nekoIcon;
 
+            controlPanel.Dispose();
             controlPanel = new ControlPanel(visualizerForm, pluginLoader);
             controlPanel.Icon = nekoIcon;
 
@@ -266,10 +278,12 @@ namespace NekoBeats
     public class NekoBeatsPluginHost : INekoBeatsHost
     {
         private VisualizerForm visualizerForm;
+        private ControlPanel controlPanel;
 
-        public NekoBeatsPluginHost(VisualizerForm form)
+        public NekoBeatsPluginHost(VisualizerForm form, ControlPanel panel)
         {
             visualizerForm = form;
+            controlPanel = panel;
         }
 
         public void Log(string message)
@@ -334,6 +348,14 @@ namespace NekoBeats
         public int GetCurrentFPS()
         {
             return visualizerForm.Logic.fpsLimit;
+        }
+
+        public void AddControlPanelTab(string tabName, Action<Panel> buildTab)
+        {
+            if (controlPanel != null && !controlPanel.IsDisposed)
+            {
+                controlPanel.AddPluginTab(tabName, buildTab);
+            }
         }
     }
 }
