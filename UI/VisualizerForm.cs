@@ -86,7 +86,6 @@ namespace NekoBeats
             this.MouseMove += OnMouseMove;
             this.MouseUp += OnMouseUp;
 
-            // Make window layered for overlay mode
             int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
             SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
         }
@@ -153,9 +152,12 @@ namespace NekoBeats
                 this.Text = "NekoBeats V2.3.3 - Streaming Mode";
                 SetClickThrough(false);
                 
-                // Remove layered window for streaming mode (better performance)
                 int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
                 SetWindowLong(this.Handle, GWL_EXSTYLE, style & ~WS_EX_LAYERED);
+                
+                this.Show();
+                this.BringToFront();
+                this.Invalidate();
             }
             else
             {
@@ -168,44 +170,40 @@ namespace NekoBeats
                 this.Text = "NekoBeats V2.3.3";
                 SetClickThrough(true);
                 
-                // Re-enable layered window for overlay mode
                 int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
                 SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED);
+                
+                this.Show();
+                this.BringToFront();
+                this.Invalidate();
             }
-            
-            this.Invalidate();
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
             if (streamingMode)
             {
-                // Streaming mode: fast GDI+ drawing
                 e.Graphics.Clear(Color.Black);
                 logic.RenderCustomBackground(e.Graphics, this.ClientSize);
                 logic.Render(e.Graphics, this.ClientSize);
             }
             else
             {
-                // Overlay mode: layered window with per-pixel alpha
                 DrawWithLayeredWindow();
             }
         }
 
         private void DrawWithLayeredWindow()
         {
-            // Create bitmap with alpha channel
+            if (this.ClientSize.Width <= 0 || this.ClientSize.Height <= 0)
+                return;
+                
             using (Bitmap bitmap = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
             using (Graphics g = Graphics.FromImage(bitmap))
             {
-                // Clear to fully transparent
                 g.Clear(Color.Transparent);
-                
-                // Draw everything with proper alpha
                 logic.RenderCustomBackground(g, this.ClientSize);
                 logic.Render(g, this.ClientSize);
-                
-                // Update layered window
                 UpdateLayeredWindow(bitmap);
             }
         }
@@ -222,10 +220,10 @@ namespace NekoBeats
             Point topPos = new Point(this.Left, this.Top);
             
             BLENDFUNCTION blend = new BLENDFUNCTION();
-            blend.BlendOp = 0; // AC_SRC_OVER
+            blend.BlendOp = 0;
             blend.BlendFlags = 0;
             blend.SourceConstantAlpha = (byte)(logic.opacity * 255);
-            blend.AlphaFormat = 1; // AC_SRC_ALPHA
+            blend.AlphaFormat = 1;
             
             UpdateLayeredWindow(this.Handle, screenDc, ref topPos, ref size, memDc, ref pointSource, 0, ref blend, 2);
             
