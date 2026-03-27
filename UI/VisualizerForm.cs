@@ -148,37 +148,10 @@ namespace NekoBeats
             }
             else
             {
-                using (Bitmap buffer = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
-                using (Graphics g = Graphics.FromImage(buffer))
-                {
-                    g.Clear(Color.Transparent);
-                    logic.RenderCustomBackground(g, this.ClientSize);
-                    logic.Render(g, this.ClientSize);
-                    
-                    float opacity = logic.opacity;
-                    if (opacity >= 0.99f)
-                    {
-                        e.Graphics.DrawImage(buffer, 0, 0);
-                    }
-                    else
-                    {
-                        float[][] matrixItems = new float[5][];
-                        matrixItems[0] = new float[] { 1, 0, 0, 0, 0 };
-                        matrixItems[1] = new float[] { 0, 1, 0, 0, 0 };
-                        matrixItems[2] = new float[] { 0, 0, 1, 0, 0 };
-                        matrixItems[3] = new float[] { 0, 0, 0, opacity, 0 };
-                        matrixItems[4] = new float[] { 0, 0, 0, 0, 1 };
-                        
-                        ColorMatrix colorMatrix = new ColorMatrix(matrixItems);
-                        ImageAttributes imageAttr = new ImageAttributes();
-                        imageAttr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                        
-                        e.Graphics.DrawImage(buffer, 
-                            new Rectangle(0, 0, buffer.Width, buffer.Height),
-                            0, 0, buffer.Width, buffer.Height,
-                            GraphicsUnit.Pixel, imageAttr);
-                    }
-                }
+                // Clear with transparent - no magenta background
+                e.Graphics.Clear(Color.Transparent);
+                logic.RenderCustomBackground(e.Graphics, this.ClientSize);
+                logic.Render(e.Graphics, this.ClientSize);
             }
         }
 
