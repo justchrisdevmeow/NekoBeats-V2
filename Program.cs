@@ -13,7 +13,6 @@ namespace NekoBeats
     static class Program
     {
         private const string CURRENT_VERSION = "2.3.3";
-        private const string LATEST_VERSION = "2.3.4";
         private const string GITHUB_REPO = "justdev-chris/NekoBeats-V2";
         private const string GITHUB_API_URL = "https://api.github.com/repos/" + GITHUB_REPO + "/releases/tags/v" + LATEST_VERSION;
         private const string GITHUB_RELEASES_URL = "https://github.com/" + GITHUB_REPO + "/releases";
@@ -181,39 +180,64 @@ namespace NekoBeats
         }
 
         private static void CheckForUpdates()
+{
+    Task.Run(async () =>
+    {
+        try
         {
-            Task.Run(async () =>
+            using (HttpClient client = new HttpClient())
             {
-                try
+                client.DefaultRequestHeaders.Add("User-Agent", "NekoBeats");
+                string url = $"https://api.github.com/repos/{GITHUB_REPO}/releases/latest";
+                HttpResponseMessage response = await client.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    using (HttpClient client = new HttpClient())
+                    string json = await response.Content.ReadAsStringAsync();
+
+                    int tagStart = json.IndexOf("\"tag_name\":\"v") + 13;
+                    int tagEnd = json.IndexOf("\"", tagStart);
+                    string latestVersion = json.Substring(tagStart, tagEnd - tagStart);
+
+                    if (IsNewerVersion(latestVersion, CURRENT_VERSION))
                     {
-                        client.DefaultRequestHeaders.Add("User-Agent", "NekoBeats");
-                        HttpResponseMessage response = await client.GetAsync(GITHUB_API_URL);
+                        DialogResult result = MessageBox.Show(
+                            $"New version available: v{latestVersion}\n\nCurrent: v{CURRENT_VERSION}",
+                            "Update Available",
+                            MessageBoxButtons.OKCancel,
+                            MessageBoxIcon.Information
+                        );
 
-                        if (response.IsSuccessStatusCode)
-                        {
-                            if (LATEST_VERSION != CURRENT_VERSION)
-                            {
-                                DialogResult result = MessageBox.Show(
-                                    $"New version available: v{LATEST_VERSION}\n\nCurrent: v{CURRENT_VERSION}",
-                                    "Update Available",
-                                    MessageBoxButtons.OKCancel,
-                                    MessageBoxIcon.Information
-                                );
-
-                                if (result == DialogResult.OK)
-                                    OpenReleasesPage();
-                            }
-                        }
+                        if (result == DialogResult.OK)
+                            OpenReleasesPage();
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Update check failed: {ex.Message}");
-                }
-            });
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Update check failed: {ex.Message}");
+        }
+    });
+}
+
+private static bool IsNewerVersion(string latest, string current)
+{
+    try
+    {
+        var l = Array.ConvertAll(latest.Split('.'), int.Parse);
+        var c = Array.ConvertAll(current.Split('.'), int.Parse);
+
+        for (int i = 0; i < Math.Min(l.Length, c.Length); i++)
+        {
+            if (l[i] > c[i]) return true;
+            if (l[i] < c[i]) return false;
+        }
+        return false;
+    }
+    catch { return false; }
+}
+
 
         private static void OpenReleasesPage()
         {
