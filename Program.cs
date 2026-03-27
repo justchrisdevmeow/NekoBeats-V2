@@ -26,6 +26,16 @@ namespace NekoBeats
         [STAThread]
         static void Main()
         {
+            // Error logging
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                try
+                {
+                    File.WriteAllText("crash.log", $"{DateTime.Now}: {e.ExceptionObject}\n");
+                }
+                catch { }
+            };
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -39,6 +49,7 @@ namespace NekoBeats
             }
             catch (Exception ex)
             {
+                File.WriteAllText("crash.log", $"{DateTime.Now}: {ex}\n");
                 MessageBox.Show($"Error: {ex.Message}", "NekoBeats Error");
                 ExitApplication();
             }
@@ -71,7 +82,7 @@ namespace NekoBeats
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Discord RPC failed: {ex.Message}");
+                File.AppendAllText("crash.log", $"{DateTime.Now}: Discord RPC failed: {ex.Message}\n");
                 discordRpc = null;
             }
         }
@@ -215,7 +226,7 @@ namespace NekoBeats
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Update check failed: {ex.Message}");
+                    File.AppendAllText("crash.log", $"{DateTime.Now}: Update check failed: {ex.Message}\n");
                 }
             });
         }
@@ -273,7 +284,7 @@ namespace NekoBeats
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Discord update failed: {ex.Message}");
+                File.AppendAllText("crash.log", $"{DateTime.Now}: Discord update failed: {ex.Message}\n");
             }
         }
 
@@ -290,7 +301,7 @@ namespace NekoBeats
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during shutdown: {ex.Message}");
+                File.AppendAllText("crash.log", $"{DateTime.Now}: Shutdown error: {ex.Message}\n");
             }
 
             Application.Exit();
@@ -310,7 +321,7 @@ namespace NekoBeats
 
         public void Log(string message)
         {
-            Console.WriteLine($"[Plugin] {message}");
+            File.AppendAllText("crash.log", $"{DateTime.Now}: [Plugin] {message}\n");
         }
 
         public void SetBarColor(Color color)
