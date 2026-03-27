@@ -15,7 +15,6 @@ namespace NekoBeats
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
         private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_LAYERED = 0x80000;
         private const int WS_EX_TRANSPARENT = 0x20;
 
         private VisualizerLogic logic;
@@ -59,9 +58,7 @@ namespace NekoBeats
             this.MouseMove += OnMouseMove;
             this.MouseUp += OnMouseUp;
 
-            // Make click-through enabled by default
-            int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
-            SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+            SetClickThrough(true);
         }
 
         private void InitializeLogic()
@@ -102,7 +99,7 @@ namespace NekoBeats
             int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
             if (enable)
             {
-                SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+                SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_TRANSPARENT);
             }
             else
             {
@@ -137,6 +134,8 @@ namespace NekoBeats
                 this.Text = "NekoBeats V2.3.3";
                 SetClickThrough(true);
             }
+            
+            this.Invalidate();
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
