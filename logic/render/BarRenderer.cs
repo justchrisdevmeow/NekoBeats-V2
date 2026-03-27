@@ -149,6 +149,18 @@ namespace NekoBeats
             }
         }
 
+
+        private float GetBarHeight(int barIndex)
+{
+    if (!fadeEffectEnabled)
+        return smoothedBarValues[barIndex];
+    
+    if (barIndex >= fadeValues.Length)
+        return smoothedBarValues[barIndex];
+    
+    return fadeValues[barIndex];
+}
+        
         private void DrawLiquid(Graphics g, Size clientSize)
         {
             float barWidth = (float)clientSize.Width / barCount;
