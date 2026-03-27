@@ -155,7 +155,6 @@ namespace NekoBeats
         {
             if (logic.draggable && e.Button == MouseButtons.Left && !streamingMode)
             {
-                // Disable click-through temporarily while dragging
                 SetClickThrough(false);
                 
                 if (this.WindowState == FormWindowState.Maximized)
@@ -183,7 +182,6 @@ namespace NekoBeats
         {
             if (isDragging)
             {
-                // Re-enable click-through after dragging
                 SetClickThrough(true);
                 isDragging = false;
             }
