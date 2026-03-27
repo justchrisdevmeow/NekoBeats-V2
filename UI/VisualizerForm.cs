@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
@@ -51,7 +52,6 @@ namespace NekoBeats
             this.TopMost = true;
             this.DoubleBuffered = true;
             this.ShowInTaskbar = false;
-            this.Opacity = 1.0f;
             this.Paint += OnPaint;
             this.FormClosing += OnFormClosing;
             this.Resize += OnResize;
@@ -59,7 +59,6 @@ namespace NekoBeats
             this.MouseMove += OnMouseMove;
             this.MouseUp += OnMouseUp;
 
-            // Make click-through enabled by default
             int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
             SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
         }
@@ -141,9 +140,46 @@ namespace NekoBeats
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
-            e.Graphics.Clear(Color.Transparent);
-            logic.RenderCustomBackground(e.Graphics, this.ClientSize);
-            logic.Render(e.Graphics, this.ClientSize);
+            if (streamingMode)
+            {
+                e.Graphics.Clear(Color.Black);
+                logic.RenderCustomBackground(e.Graphics, this.ClientSize);
+                logic.Render(e.Graphics, this.ClientSize);
+            }
+            else
+            {
+                using (Bitmap buffer = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
+                using (Graphics g = Graphics.FromImage(buffer))
+                {
+                    g.Clear(Color.Transparent);
+                    logic.RenderCustomBackground(g, this.ClientSize);
+                    logic.Render(g, this.ClientSize);
+                    
+                    float opacity = logic.opacity;
+                    if (opacity >= 0.99f)
+                    {
+                        e.Graphics.DrawImage(buffer, 0, 0);
+                    }
+                    else
+                    {
+                        float[][] matrixItems = new float[5][];
+                        matrixItems[0] = new float[] { 1, 0, 0, 0, 0 };
+                        matrixItems[1] = new float[] { 0, 1, 0, 0, 0 };
+                        matrixItems[2] = new float[] { 0, 0, 1, 0, 0 };
+                        matrixItems[3] = new float[] { 0, 0, 0, opacity, 0 };
+                        matrixItems[4] = new float[] { 0, 0, 0, 0, 1 };
+                        
+                        ColorMatrix colorMatrix = new ColorMatrix(matrixItems);
+                        ImageAttributes imageAttr = new ImageAttributes();
+                        imageAttr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                        
+                        e.Graphics.DrawImage(buffer, 
+                            new Rectangle(0, 0, buffer.Width, buffer.Height),
+                            0, 0, buffer.Width, buffer.Height,
+                            GraphicsUnit.Pixel, imageAttr);
+                    }
+                }
+            }
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
@@ -155,7 +191,6 @@ namespace NekoBeats
         {
             if (logic.draggable && e.Button == MouseButtons.Left && !streamingMode)
             {
-                // Disable click-through temporarily while dragging
                 SetClickThrough(false);
                 
                 if (this.WindowState == FormWindowState.Maximized)
@@ -183,7 +218,6 @@ namespace NekoBeats
         {
             if (isDragging)
             {
-                // Re-enable click-through after dragging
                 SetClickThrough(true);
                 isDragging = false;
             }
