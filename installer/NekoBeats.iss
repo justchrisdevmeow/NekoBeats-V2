@@ -26,12 +26,13 @@ Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
 Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl"
-Name: "zh"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "zh"; MessagesFile: "D:\a\NekoBeats-V2\NekoBeats-V2\lang\ChineseSimplified.isl"
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "pt"; MessagesFile: "compiler:Languages\Portuguese.isl"
 Name: "it"; MessagesFile: "compiler:Languages\Italian.isl"
 Name: "ko"; MessagesFile: "compiler:Languages\Korean.isl"
 Name: "ar"; MessagesFile: "compiler:Languages\Arabic.isl"
+Name: "traditional"; MessagesFile: "D:\a\NekoBeats-V2\NekoBeats-V2\lang\ChineseTraditional.isl"
 
 [Files]
 Source: "..\bin\Release\net8.0-windows\win-x64\publish\NekoBeats.exe"; DestDir: "{app}"; Flags: ignoreversion
