@@ -152,7 +152,7 @@ namespace NekoBeats
             barLogic.barRenderer.mirrorMode = mirrorMode;
           //  barLogic.barRenderer.invertColors = invertColors; for later
             // barLogic.barRenderer.waveformMode = waveformMode; for later
-            barLogic.barRenderer.spectrumMode = spectrumMode;
+           // barLogic.barRenderer.spectrumMode = spectrumMode;
             
           //  if (waveformMode)
            //     barLogic.barRenderer.SetWaveformData(audioCapture.GetWaveformData()); LATER
