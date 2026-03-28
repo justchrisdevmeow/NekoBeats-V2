@@ -49,6 +49,12 @@ namespace NekoBeats
         public int particleCount = 100;
         public float circleRadius = 200f;
         
+        // v2.3.4 properties
+        public bool MirrorMode { get; set; } = false;
+        public bool WaveformMode { get; set; } = false;
+        public bool SpectrumMode { get; set; } = false;
+        public bool InvertColors { get; set; } = false;
+        
         // Bar Preset System
         public BarPreset barPreset { get; private set; } = null;
         private System.Diagnostics.Stopwatch animationTimer = new System.Diagnostics.Stopwatch();
@@ -77,19 +83,12 @@ namespace NekoBeats
         }
         
         // V2.3.2 NEW FEATURES
-        // Latency compensation
         public int latencyCompensationMs = 0;
-        
-        // Fade effect
         public bool fadeEffectEnabled = false;
         public float fadeEffectSpeed = 0.5f;
         private float[] fadeValues = new float[512];
-        
-        // Custom background
         public string customBackgroundPath = null;
         private Bitmap customBackgroundImage = null;
-        
-        // Gradient support
         public Color[] gradientColors = null;
         public bool useGradient = false;
         
@@ -99,9 +98,11 @@ namespace NekoBeats
         private Random random = new Random();
         private Bitmap bloomBuffer;
         private Graphics bloomGraphics;
+        private AudioCapture audioCapture;
         
         public VisualizerLogic()
         {
+            audioCapture = new AudioCapture();
             InitializeAudio();
             InitializeParticles();
             animationTimer.Start();
@@ -111,6 +112,8 @@ namespace NekoBeats
         public void Initialize(Size clientSize)
         {
             InitializeBloomBuffer(clientSize);
+            audioCapture.BarCount = barCount;
+            audioCapture.Start();
         }
         
         private void InitializeAudio()
@@ -197,19 +200,14 @@ namespace NekoBeats
         
         public void UpdateSmoothing()
         {
-            for (int i = 0; i < 512; i++)
-            {
-                smoothedBarValues[i] += (barValues[i] - smoothedBarValues[i]) * smoothSpeed;
-            }
+            // Get fresh audio data from AudioCapture
+            float[] rawValues = audioCapture.SmoothedBarValues;
             
-            // V2.3.2: Color cycling - UPDATE HUE
-            if (colorCycling)
+            for (int i = 0; i < barCount && i < rawValues.Length; i++)
             {
-                hue += colorSpeed * 2f;
-                if (hue >= 360) hue -= 360;
-                
-                // Apply cycling color to barColor
-                barColor = ColorFromHSV(hue, 0.8f, 1.0f);
+                float raw = rawValues[i] * sensitivity;
+                raw = Math.Min(1f, raw);
+                smoothedBarValues[i] = smoothedBarValues[i] * (1 - smoothSpeed) + raw * smoothSpeed;
             }
             
             // Update fade effect
@@ -229,7 +227,7 @@ namespace NekoBeats
                 }
             }
             
-            // Update bar logic - SYNC ALL PROPERTIES
+            // Update bar logic
             barLogic.barColor = barColor;
             barLogic.sensitivity = sensitivity;
             barLogic.barHeight = barHeight;
@@ -239,15 +237,67 @@ namespace NekoBeats
             barLogic.circleRadius = circleRadius;
             barLogic.currentStyle = _animationStyle;
             
-            // Sync to BarRenderer through barLogic
             barLogic.barRenderer.opacity = opacity;
             barLogic.barRenderer.fadeEffectEnabled = fadeEffectEnabled;
             barLogic.barRenderer.fadeEffectSpeed = fadeEffectSpeed;
             barLogic.barRenderer.useGradient = useGradient;
             barLogic.barRenderer.gradientColors = gradientColors;
             barLogic.barRenderer.currentTheme = barLogic.currentTheme;
+            barLogic.barRenderer.mirrorMode = MirrorMode;
+            barLogic.barRenderer.waveformMode = WaveformMode;
+            barLogic.barRenderer.spectrumMode = SpectrumMode;
+            barLogic.barRenderer.invertColors = InvertColors;
             
             barLogic.Update();
+            
+            // Update particles
+            if (particlesEnabled)
+                UpdateParticles();
+            
+            // Update color cycling
+            if (colorCycling)
+            {
+                hue += colorSpeed * 2f;
+                if (hue >= 360) hue -= 360;
+                barColor = ColorFromHSV(hue, 0.8f, 1.0f);
+            }
+        }
+        
+        private void UpdateParticles()
+        {
+            float audioLevel = 0;
+            for (int i = 0; i < Math.Min(12, smoothedBarValues.Length); i++)
+                audioLevel += smoothedBarValues[i];
+            audioLevel /= 12;
+            
+            if (audioLevel > 0.5f && random.Next(100) < 20)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    particles.Add(new Particle
+                    {
+                        X = random.Next(0, Math.Max(1, 800)),
+                        Y = 600 - random.Next(100),
+                        SpeedX = (random.NextSingle() - 0.5f) * 2,
+                        SpeedY = (random.NextSingle() - 1.0f) * 2,
+                        Size = random.Next(2, 5),
+                        Life = 1.0f
+                    });
+                }
+            }
+            
+            for (int i = particles.Count - 1; i >= 0; i--)
+            {
+                Particle p = particles[i];
+                p.X += p.SpeedX;
+                p.Y += p.SpeedY;
+                p.Life -= 0.02f;
+                
+                if (p.Life <= 0 || p.Y < 0 || p.X < 0 || p.X > 800)
+                    particles.RemoveAt(i);
+                else
+                    particles[i] = p;
+            }
         }
         
         public void Render(Graphics g, Size clientSize)
@@ -257,7 +307,7 @@ namespace NekoBeats
             // Render custom background first
             RenderCustomBackground(g, clientSize);
             
-            // SYNC ALL PROPERTIES TO BARLOGIC
+            // Sync all properties to BarLogic
             barLogic.barColor = barColor;
             barLogic.sensitivity = sensitivity;
             barLogic.barHeight = barHeight;
@@ -267,15 +317,17 @@ namespace NekoBeats
             barLogic.circleRadius = circleRadius;
             barLogic.currentStyle = _animationStyle;
             
-            // SYNC BARRENDERER THEME
             barLogic.barRenderer.currentTheme = barLogic.currentTheme;
             barLogic.barRenderer.opacity = opacity;
             barLogic.barRenderer.fadeEffectEnabled = fadeEffectEnabled;
             barLogic.barRenderer.fadeEffectSpeed = fadeEffectSpeed;
             barLogic.barRenderer.useGradient = useGradient;
             barLogic.barRenderer.gradientColors = gradientColors;
+            barLogic.barRenderer.mirrorMode = MirrorMode;
+            barLogic.barRenderer.waveformMode = WaveformMode;
+            barLogic.barRenderer.spectrumMode = SpectrumMode;
+            barLogic.barRenderer.invertColors = InvertColors;
             
-            // V2.3.2: Pass gradient and fade to barlogic
             if (useGradient && gradientColors != null)
                 barLogic.SetGradient(gradientColors);
             
@@ -297,41 +349,14 @@ namespace NekoBeats
         
         private void DrawParticles(Graphics g, Size clientSize)
         {
-            float bass = GetBassLevel();
-            using (SolidBrush brush = new SolidBrush(Color.FromArgb(180, barColor)))
+            foreach (var p in particles)
             {
-                for (int i = 0; i < particles.Count; i++)
+                int alpha = (int)(p.Life * 200);
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, barColor)))
                 {
-                    Particle p = particles[i];
-                    
-                    if (bass > 0.15f) p.SpeedY -= bass * 2.5f;
-                    
-                    p.X += p.SpeedX;
-                    p.Y += p.SpeedY;
-                    p.Life--;
-                    
-                    if (p.Life <= 0 || p.Y < -20 || p.X < -20 || p.X > clientSize.Width + 20)
-                    {
-                        p.X = random.Next(0, clientSize.Width);
-                        p.Y = clientSize.Height + 10;
-                        p.Life = random.Next(50, 200);
-                        p.SpeedY = (random.NextSingle() - 1.0f) * 2.0f;
-                        p.SpeedX = (random.NextSingle() - 0.5f) * 2.0f;
-                    }
-                    
-                    particles[i] = p;
-                    g.FillEllipse(brush, p.X, p.Y, p.Size, p.Size);
+                    g.FillEllipse(brush, p.X - 2, p.Y - 2, p.Size, p.Size);
                 }
             }
-        }
-        
-        private float GetBassLevel()
-        {
-            float sum = 0;
-            int count = Math.Min(12, barCount);
-            for (int i = 0; i < count; i++) 
-                sum += smoothedBarValues[i];
-            return sum / count;
         }
         
         private void ApplyBloomEffect(Graphics g, Size clientSize)
@@ -372,29 +397,36 @@ namespace NekoBeats
         }
 
         public void LoadBarPreset(string filePath)
-{
-    barPreset = BarPreset.LoadFromFile(filePath);
-    if (barPreset != null)
-    {
-        barHeight = barPreset.BarHeight;
-        barSpacing = barPreset.BarSpacing;
-        barLogic.currentTheme = (BarRenderer.BarTheme)barPreset.BarShape;
-        
-        Color[] colors = new Color[barPreset.Colors.Length];
-        for (int i = 0; i < barPreset.Colors.Length; i++)
-            colors[i] = ColorTranslator.FromHtml(barPreset.Colors[i]);
-        gradientColors = colors;
-        useGradient = true;
-    }
-}
-
+        {
+            barPreset = BarPreset.LoadFromFile(filePath);
+            if (barPreset != null)
+            {
+                barHeight = barPreset.BarHeight;
+                barSpacing = barPreset.BarSpacing;
+                barLogic.currentTheme = (BarRenderer.BarTheme)barPreset.BarShape;
+                
+                Color[] colors = new Color[barPreset.Colors.Length];
+                for (int i = 0; i < barPreset.Colors.Length; i++)
+                    colors[i] = ColorTranslator.FromHtml(barPreset.Colors[i]);
+                gradientColors = colors;
+                useGradient = true;
+            }
+        }
 
         public void SaveBarPreset(string filePath)
         {
             barPreset.SaveToFile(filePath);
         }
         
-        // V2.3.2 NEW METHODS
+        public List<string> GetAudioDevices()
+        {
+            return audioCapture.GetAudioDevices();
+        }
+        
+        public void SetAudioDevice(int deviceIndex)
+        {
+            audioCapture.SetDevice(deviceIndex);
+        }
         
         public void ResetToDefault()
         {
@@ -422,6 +454,10 @@ namespace NekoBeats
             gradientColors = null;
             barPreset = null;
             hue = 0;
+            MirrorMode = false;
+            WaveformMode = false;
+            SpectrumMode = false;
+            InvertColors = false;
         }
 
         public void SetCustomBackground(string imagePath)
@@ -551,7 +587,11 @@ namespace NekoBeats
                     customBackgroundPath,
                     useGradient,
                     gradientColors = gradientColors?.Select(c => c.ToArgb()).ToArray(),
-                    barTheme = (int)barLogic.currentTheme
+                    barTheme = (int)barLogic.currentTheme,
+                    mirrorMode = MirrorMode,
+                    waveformMode = WaveformMode,
+                    spectrumMode = SpectrumMode,
+                    invertColors = InvertColors
                 };
 
                 string json = JsonSerializer.Serialize(preset, new JsonSerializerOptions { WriteIndented = true });
@@ -564,76 +604,88 @@ namespace NekoBeats
         }
 
         public void LoadPreset(string filename)
-{
-    if (!File.Exists(filename)) return;
-    try 
-    {
-        string json = File.ReadAllText(filename);
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
-        
-        barColor = Color.FromArgb(root.GetProperty("barColor").GetInt32());
-        opacity = root.GetProperty("opacity").GetSingle();
-        barHeight = root.GetProperty("barHeight").GetInt32();
-        barCount = root.GetProperty("barCount").GetInt32();
-        smoothSpeed = root.GetProperty("smoothSpeed").GetSingle();
-        sensitivity = root.GetProperty("sensitivity").GetSingle();
-        animationStyle = (BarLogic.AnimationStyle)root.GetProperty("animationStyle").GetInt32();
-        particleCount = root.GetProperty("particleCount").GetInt32();
-        particlesEnabled = root.GetProperty("particlesEnabled").GetBoolean();
-        circleRadius = root.GetProperty("circleRadius").GetSingle();
-        bloomEnabled = root.GetProperty("bloomEnabled").GetBoolean();
-        bloomIntensity = root.GetProperty("bloomIntensity").GetInt32();
-        colorCycling = root.GetProperty("colorCycling").GetBoolean();
-        colorSpeed = root.GetProperty("colorSpeed").GetSingle();
-        fpsLimit = root.GetProperty("fpsLimit").GetInt32();
-        clickThrough = root.GetProperty("clickThrough").GetBoolean();
-        draggable = root.GetProperty("draggable").GetBoolean();
-        
-        if (root.TryGetProperty("rainbowBars", out var rainbowProp))
-            rainbowBars = rainbowProp.GetBoolean();
-            
-        if (root.TryGetProperty("barSpacing", out var spacingProp))
-            barSpacing = spacingProp.GetInt32();
-            
-        if (root.TryGetProperty("barTheme", out var themeProp))
-            barLogic.currentTheme = (BarRenderer.BarTheme)themeProp.GetInt32();
-        
-        if (root.TryGetProperty("latencyCompensationMs", out var latencyProp))
-            latencyCompensationMs = latencyProp.GetInt32();
-            
-        if (root.TryGetProperty("fadeEffectEnabled", out var fadeProp))
-            fadeEffectEnabled = fadeProp.GetBoolean();
-            
-        if (root.TryGetProperty("fadeEffectSpeed", out var fadeSpeedProp))
-            fadeEffectSpeed = fadeSpeedProp.GetSingle();
-            
-        if (root.TryGetProperty("customBackgroundPath", out var bgProp))
-            SetCustomBackground(bgProp.GetString());
-            
-        if (root.TryGetProperty("useGradient", out var gradientProp))
-            useGradient = gradientProp.GetBoolean();
-            
-        if (root.TryGetProperty("gradientColors", out var colorsProp) && colorsProp.ValueKind != JsonValueKind.Null)
         {
-            var colors = new List<Color>();
-            foreach (var colorInt in colorsProp.EnumerateArray())
+            if (!File.Exists(filename)) return;
+            try 
             {
-                colors.Add(Color.FromArgb(colorInt.GetInt32()));
+                string json = File.ReadAllText(filename);
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                
+                barColor = Color.FromArgb(root.GetProperty("barColor").GetInt32());
+                opacity = root.GetProperty("opacity").GetSingle();
+                barHeight = root.GetProperty("barHeight").GetInt32();
+                barCount = root.GetProperty("barCount").GetInt32();
+                smoothSpeed = root.GetProperty("smoothSpeed").GetSingle();
+                sensitivity = root.GetProperty("sensitivity").GetSingle();
+                animationStyle = (BarLogic.AnimationStyle)root.GetProperty("animationStyle").GetInt32();
+                particleCount = root.GetProperty("particleCount").GetInt32();
+                particlesEnabled = root.GetProperty("particlesEnabled").GetBoolean();
+                circleRadius = root.GetProperty("circleRadius").GetSingle();
+                bloomEnabled = root.GetProperty("bloomEnabled").GetBoolean();
+                bloomIntensity = root.GetProperty("bloomIntensity").GetInt32();
+                colorCycling = root.GetProperty("colorCycling").GetBoolean();
+                colorSpeed = root.GetProperty("colorSpeed").GetSingle();
+                fpsLimit = root.GetProperty("fpsLimit").GetInt32();
+                clickThrough = root.GetProperty("clickThrough").GetBoolean();
+                draggable = root.GetProperty("draggable").GetBoolean();
+                
+                if (root.TryGetProperty("rainbowBars", out var rainbowProp))
+                    rainbowBars = rainbowProp.GetBoolean();
+                    
+                if (root.TryGetProperty("barSpacing", out var spacingProp))
+                    barSpacing = spacingProp.GetInt32();
+                    
+                if (root.TryGetProperty("barTheme", out var themeProp))
+                    barLogic.currentTheme = (BarRenderer.BarTheme)themeProp.GetInt32();
+                
+                if (root.TryGetProperty("latencyCompensationMs", out var latencyProp))
+                    latencyCompensationMs = latencyProp.GetInt32();
+                    
+                if (root.TryGetProperty("fadeEffectEnabled", out var fadeProp))
+                    fadeEffectEnabled = fadeProp.GetBoolean();
+                    
+                if (root.TryGetProperty("fadeEffectSpeed", out var fadeSpeedProp))
+                    fadeEffectSpeed = fadeSpeedProp.GetSingle();
+                    
+                if (root.TryGetProperty("customBackgroundPath", out var bgProp))
+                    SetCustomBackground(bgProp.GetString());
+                    
+                if (root.TryGetProperty("useGradient", out var gradientProp))
+                    useGradient = gradientProp.GetBoolean();
+                    
+                if (root.TryGetProperty("gradientColors", out var colorsProp) && colorsProp.ValueKind != JsonValueKind.Null)
+                {
+                    var colors = new List<Color>();
+                    foreach (var colorInt in colorsProp.EnumerateArray())
+                    {
+                        colors.Add(Color.FromArgb(colorInt.GetInt32()));
+                    }
+                    if (colors.Count > 0)
+                        gradientColors = colors.ToArray();
+                }
+                
+                if (root.TryGetProperty("mirrorMode", out var mirrorProp))
+                    MirrorMode = mirrorProp.GetBoolean();
+                    
+                if (root.TryGetProperty("waveformMode", out var waveformProp))
+                    WaveformMode = waveformProp.GetBoolean();
+                    
+                if (root.TryGetProperty("spectrumMode", out var spectrumProp))
+                    SpectrumMode = spectrumProp.GetBoolean();
+                    
+                if (root.TryGetProperty("invertColors", out var invertProp))
+                    InvertColors = invertProp.GetBoolean();
+            } 
+            catch (Exception ex)
+            {
+                MessageBox.Show("Load failed: " + ex.Message);
             }
-            if (colors.Count > 0)
-                gradientColors = colors.ToArray();
         }
-    } 
-    catch (Exception ex)
-    {
-        MessageBox.Show("Load failed: " + ex.Message);
-    }
-}
-
         
         public void Dispose()
         {
+            audioCapture?.Dispose();
             if (capture != null)
             {
                 capture.StopRecording();
@@ -647,7 +699,8 @@ namespace NekoBeats
         private struct Particle 
         {
             public float X, Y, SpeedX, SpeedY;
-            public int Size, Life;
+            public int Size;
+            public float Life;
         }
     }
 }
