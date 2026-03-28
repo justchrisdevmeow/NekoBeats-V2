@@ -186,6 +186,10 @@ jobs:
             "Version": "NekoBeats V2.3.4",
             "GitHub": "github.com/justdev-chris/NekoBeats-V2",
             "Uninstall": "Uninstall NekoBeats"
+            "Next": "NEXT ▶",
+            "Back": "◀ BACK",
+            "LetsGo": "LET'S GO! 🐱",
+            "DontShowAgain": "Don't show this again"
           }
           EOF
       
