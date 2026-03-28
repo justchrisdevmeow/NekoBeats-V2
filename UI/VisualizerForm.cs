@@ -4,7 +4,6 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
-using System.Linq;
 
 namespace NekoBeats
 {
@@ -69,7 +68,7 @@ namespace NekoBeats
 
         private void InitializeForm()
         {
-            this.Text = "NekoBeats V2.3.4";
+            this.Text = LanguageManager.Get("VisualizerTitle");
 
             if (File.Exists("NekoBeatsLogo.ico"))
             {
@@ -168,7 +167,7 @@ namespace NekoBeats
                 this.BackColor = Color.Magenta;
                 this.TransparencyKey = Color.Magenta;
                 this.WindowState = FormWindowState.Maximized;
-                this.Text = "NekoBeats V2.3.4";
+                this.Text = LanguageManager.Get("VisualizerTitle");
                 SetClickThrough(true);
                 
                 int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
@@ -181,47 +180,25 @@ namespace NekoBeats
         }
 
         public void SetMonitor(int monitorIndex)
-{
-    if (monitorIndex < 0 || monitorIndex >= Screen.AllScreens.Length) return;
-    
-    var screen = Screen.AllScreens[monitorIndex];
-    this.Location = screen.Bounds.Location;
-    this.Size = screen.Bounds.Size;
-    
-    if (!streamingMode)
-    {
-        // Force layered window to update position
-        using (Bitmap bitmap = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
-        using (Graphics g = Graphics.FromImage(bitmap))
         {
-            g.Clear(Color.Transparent);
-            logic.RenderCustomBackground(g, this.ClientSize);
-            logic.Render(g, this.ClientSize);
+            if (monitorIndex < 0 || monitorIndex >= Screen.AllScreens.Length) return;
             
-            IntPtr screenDc = GetDC(IntPtr.Zero);
-            IntPtr memDc = CreateCompatibleDC(screenDc);
-            IntPtr hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
-            IntPtr oldBitmap = SelectObject(memDc, hBitmap);
-            
-            Size size = this.ClientSize;
-            Point pointSource = new Point(0, 0);
-            Point topPos = new Point(this.Left, this.Top);
-            
-            BLENDFUNCTION blend = new BLENDFUNCTION();
-            blend.BlendOp = 0;
-            blend.BlendFlags = 0;
-            blend.SourceConstantAlpha = (byte)(logic.opacity * 255);
-            blend.AlphaFormat = 1;
-            
-            UpdateLayeredWindow(this.Handle, screenDc, ref topPos, ref size, memDc, ref pointSource, 0, ref blend, 2);
-            
-            SelectObject(memDc, oldBitmap);
-            DeleteObject(hBitmap);
-            DeleteDC(memDc);
-            ReleaseDC(IntPtr.Zero, screenDc);
+            var screen = Screen.AllScreens[monitorIndex];
+            this.Location = screen.Bounds.Location;
+            this.Size = screen.Bounds.Size;
+            this.Invalidate();
         }
-    }
-}
+
+        public void SpanAllMonitors()
+        {
+            Rectangle bounds = Rectangle.Empty;
+            foreach (var screen in Screen.AllScreens)
+                bounds = Rectangle.Union(bounds, screen.Bounds);
+            
+            this.Location = bounds.Location;
+            this.Size = bounds.Size;
+            this.Invalidate();
+        }
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
