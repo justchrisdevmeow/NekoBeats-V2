@@ -367,7 +367,9 @@ namespace NekoBeats
                     {
                         if (monitorCombo.SelectedIndex < 0) return;
                         var screen = Screen.AllScreens[monitorCombo.SelectedIndex];
-                        visualizer.SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height);
+                        visualizer.Location = screen.Bounds.Location;
+                        visualizer.Size = screen.Bounds.Size;
+                        visualizer.Refresh();
                     };
                     windowGroup.Controls.Add(monitorCombo);
                     gy += 45;
@@ -388,11 +390,28 @@ namespace NekoBeats
                     Button cloneBtn = new Button { Text = "Clone on All Monitors", Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black };
                     cloneBtn.Click += (s, e) =>
                     {
+                        // Only create clones once
+                        List<VisualizerForm> clones = new List<VisualizerForm>();
                         foreach (var screen in Screen.AllScreens)
                         {
-                            var clone = new VisualizerForm(null);
-                            clone.SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height);
-                            clone.Show();
+                            // Check if monitor already has a clone
+                            bool exists = false;
+                            foreach (Form f in Application.OpenForms)
+                            {
+                                if (f is VisualizerForm vf && vf != visualizer && vf.Bounds.IntersectsWith(screen.Bounds))
+                                {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (!exists)
+                            {
+                                var clone = new VisualizerForm(null);
+                                clone.Location = screen.Bounds.Location;
+                                clone.Size = screen.Bounds.Size;
+                                clone.Show();
+                                clones.Add(clone);
+                            }
                         }
                     };
                     windowGroup.Controls.Add(cloneBtn);
