@@ -522,7 +522,6 @@ namespace NekoBeats
         }
         
         // Properties
-        public float[] smoothedBarValues => smoothedBarValues;
         public BarLogic BarLogic => barLogic;
         public float bloomIntensityValue { get => bloomIntensity; set => bloomIntensity = Math.Max(0, Math.Min(50, value)); }
         public int particleCountValue { get => particleCount; set => particleCount = Math.Max(10, Math.Min(500, value)); }
