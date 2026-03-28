@@ -150,23 +150,25 @@ namespace NekoBeats
         }
 
         private void DrawWithLayeredWindow()
+{
+    try
+    {
+        Logger.Log($"DrawWithLayeredWindow - Size: {this.ClientSize.Width}x{this.ClientSize.Height}, Opacity: {logic.opacity}");
+        
+        using (Bitmap bitmap = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
+        using (Graphics g = Graphics.FromImage(bitmap))
         {
-            // Create bitmap with alpha channel
-            using (Bitmap bitmap = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                // Clear to fully transparent
-                g.Clear(Color.Transparent);
-                
-                // Draw everything
-                logic.RenderCustomBackground(g, this.ClientSize);
-                logic.Render(g, this.ClientSize);
-                
-                // Update layered window
-                UpdateLayeredWindow(bitmap);
-            }
+            g.Clear(Color.Transparent);
+            logic.RenderCustomBackground(g, this.ClientSize);
+            logic.Render(g, this.ClientSize);
+            UpdateLayeredWindow(bitmap);
         }
-
+    }
+    catch (Exception ex)
+    {
+        Logger.Log($"DrawWithLayeredWindow ERROR: {ex.Message}");
+    }
+}
         private void UpdateLayeredWindow(Bitmap bitmap)
         {
             IntPtr screenDc = GetDC(IntPtr.Zero);
