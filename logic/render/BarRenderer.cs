@@ -28,10 +28,6 @@ namespace NekoBeats
         public bool rainbowBars;
         public float opacity = 1.0f;
         
-        // v2.3.4
-        public bool mirrorMode = false;
-        public bool waveformMode = false;
-        
         public Color[] gradientColors;
         public bool useGradient = false;
         public bool fadeEffectEnabled = false;
@@ -51,12 +47,6 @@ namespace NekoBeats
 
         public void Render(Graphics g, Size clientSize)
         {
-            if (waveformMode)
-            {
-                DrawWaveform(g, clientSize);
-                return;
-            }
-            
             switch (currentTheme)
             {
                 case BarTheme.NeonTubes:
@@ -135,45 +125,18 @@ namespace NekoBeats
             float barWidth = (float)clientSize.Width / barCount;
             float heightMultiplier = barHeight / 100f;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
+
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
+
+                using (SolidBrush brush = new SolidBrush(barColorToUse))
                 {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    
-                    using (SolidBrush brush = new SolidBrush(leftColor))
-                        g.FillRectangle(brush, leftX, leftY, barWidth - barSpacing, leftHeight);
-                        
-                    using (SolidBrush brush = new SolidBrush(rightColor))
-                        g.FillRectangle(brush, rightX, rightY, barWidth - barSpacing, rightHeight);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
-                {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
-                    
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
-                    
-                    using (SolidBrush brush = new SolidBrush(barColorToUse))
-                        g.FillRectangle(brush, x, y, barWidth - barSpacing, h);
+                    g.FillRectangle(brush, x, y, barWidth - barSpacing, h);
                 }
             }
         }
@@ -183,46 +146,19 @@ namespace NekoBeats
             float barWidth = (float)clientSize.Width / barCount;
             float heightMultiplier = barHeight / 100f;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
-                {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    float tubeDiameter = barWidth - barSpacing;
-                    
-                    using (SolidBrush brush = new SolidBrush(leftColor))
-                        g.FillRoundedRectangle(brush, leftX, leftY, tubeDiameter, leftHeight, 5);
-                    using (SolidBrush brush = new SolidBrush(rightColor))
-                        g.FillRoundedRectangle(brush, rightX, rightY, tubeDiameter, rightHeight, 5);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
-                {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
 
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
-                    float tubeDiameter = barWidth - barSpacing;
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
+                float tubeDiameter = barWidth - barSpacing;
 
-                    using (SolidBrush brush = new SolidBrush(barColorToUse))
-                        g.FillRoundedRectangle(brush, x, y, tubeDiameter, h, 5);
+                using (SolidBrush brush = new SolidBrush(barColorToUse))
+                {
+                    g.FillRoundedRectangle(brush, x, y, tubeDiameter, h, 5);
                 }
             }
         }
@@ -232,59 +168,27 @@ namespace NekoBeats
             float barWidth = (float)clientSize.Width / barCount;
             float heightMultiplier = barHeight / 100f;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
+
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
+
+                using (LinearGradientBrush brush = new LinearGradientBrush(
+                    new PointF(x, y),
+                    new PointF(x, y + h),
+                    Color.FromArgb(200, barColorToUse),
+                    Color.FromArgb(100, barColorToUse)))
                 {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                        new PointF(leftX, leftY), new PointF(leftX, leftY + leftHeight),
-                        Color.FromArgb(200, leftColor), Color.FromArgb(100, leftColor)))
-                        g.FillRectangle(brush, leftX, leftY, barWidth - barSpacing, leftHeight);
-                        
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                        new PointF(rightX, rightY), new PointF(rightX, rightY + rightHeight),
-                        Color.FromArgb(200, rightColor), Color.FromArgb(100, rightColor)))
-                        g.FillRectangle(brush, rightX, rightY, barWidth - barSpacing, rightHeight);
-                        
-                    using (Pen pen = new Pen(leftColor, 2))
-                        g.DrawLine(pen, leftX, leftY, leftX + barWidth - barSpacing, leftY);
-                    using (Pen pen = new Pen(rightColor, 2))
-                        g.DrawLine(pen, rightX, rightY, rightX + barWidth - barSpacing, rightY);
+                    g.FillRectangle(brush, x, y, barWidth - barSpacing, h);
                 }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
+
+                using (Pen pen = new Pen(barColorToUse, 2))
                 {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
-
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
-
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                        new PointF(x, y), new PointF(x, y + h),
-                        Color.FromArgb(200, barColorToUse), Color.FromArgb(100, barColorToUse)))
-                        g.FillRectangle(brush, x, y, barWidth - barSpacing, h);
-
-                    using (Pen pen = new Pen(barColorToUse, 2))
-                        g.DrawLine(pen, x, y, x + barWidth - barSpacing, y);
+                    g.DrawLine(pen, x, y, x + barWidth - barSpacing, y);
                 }
             }
         }
@@ -294,76 +198,32 @@ namespace NekoBeats
             float barWidth = (float)clientSize.Width / barCount;
             float heightMultiplier = barHeight / 100f;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
+
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
+                float mid = x + (barWidth - barSpacing) / 2;
+
+                PointF[] points = new PointF[]
                 {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    float leftMid = leftX + (barWidth - barSpacing) / 2;
-                    float rightMid = rightX + (barWidth - barSpacing) / 2;
-                    
-                    PointF[] leftPoints = new PointF[]
-                    {
-                        new PointF(leftMid, leftY),
-                        new PointF(leftX + barWidth - barSpacing, leftY + leftHeight / 2),
-                        new PointF(leftMid, leftY + leftHeight),
-                        new PointF(leftX, leftY + leftHeight / 2)
-                    };
-                    PointF[] rightPoints = new PointF[]
-                    {
-                        new PointF(rightMid, rightY),
-                        new PointF(rightX + barWidth - barSpacing, rightY + rightHeight / 2),
-                        new PointF(rightMid, rightY + rightHeight),
-                        new PointF(rightX, rightY + rightHeight / 2)
-                    };
-                    
-                    using (SolidBrush brush = new SolidBrush(leftColor))
-                        g.FillPolygon(brush, leftPoints);
-                    using (SolidBrush brush = new SolidBrush(rightColor))
-                        g.FillPolygon(brush, rightPoints);
-                    using (Pen outline = new Pen(leftColor, 1))
-                        g.DrawPolygon(outline, leftPoints);
-                    using (Pen outline = new Pen(rightColor, 1))
-                        g.DrawPolygon(outline, rightPoints);
+                    new PointF(mid, y),
+                    new PointF(x + barWidth - barSpacing, y + h / 2),
+                    new PointF(mid, y + h),
+                    new PointF(x, y + h / 2)
+                };
+
+                using (SolidBrush brush = new SolidBrush(barColorToUse))
+                {
+                    g.FillPolygon(brush, points);
                 }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
+
+                using (Pen outline = new Pen(barColorToUse, 1))
                 {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
-
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
-                    float mid = x + (barWidth - barSpacing) / 2;
-
-                    PointF[] points = new PointF[]
-                    {
-                        new PointF(mid, y),
-                        new PointF(x + barWidth - barSpacing, y + h / 2),
-                        new PointF(mid, y + h),
-                        new PointF(x, y + h / 2)
-                    };
-
-                    using (SolidBrush brush = new SolidBrush(barColorToUse))
-                        g.FillPolygon(brush, points);
-                    using (Pen outline = new Pen(barColorToUse, 1))
-                        g.DrawPolygon(outline, points);
+                    g.DrawPolygon(outline, points);
                 }
             }
         }
@@ -373,44 +233,18 @@ namespace NekoBeats
             float barWidth = (float)clientSize.Width / barCount;
             float heightMultiplier = barHeight / 100f;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
-                {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    
-                    using (Pen pen = new Pen(leftColor, 2))
-                        g.DrawRectangle(pen, leftX, leftY, barWidth - barSpacing, leftHeight);
-                    using (Pen pen = new Pen(rightColor, 2))
-                        g.DrawRectangle(pen, rightX, rightY, barWidth - barSpacing, rightHeight);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
-                {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
 
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
 
-                    using (Pen pen = new Pen(barColorToUse, 2))
-                        g.DrawRectangle(pen, x, y, barWidth - barSpacing, h);
+                using (Pen pen = new Pen(barColorToUse, 2))
+                {
+                    g.DrawRectangle(pen, x, y, barWidth - barSpacing, h);
                 }
             }
         }
@@ -420,70 +254,31 @@ namespace NekoBeats
             float barWidth = (float)clientSize.Width / barCount;
             float heightMultiplier = barHeight / 100f;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
+
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
+
+                using (LinearGradientBrush brush = new LinearGradientBrush(
+                    new PointF(x, y + h),
+                    new PointF(x + barWidth - barSpacing, y),
+                    barColorToUse,
+                    Color.FromArgb(80, barColorToUse)))
                 {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                        new PointF(leftX, leftY + leftHeight), new PointF(leftX + barWidth - barSpacing, leftY),
-                        leftColor, Color.FromArgb(80, leftColor)))
-                        g.FillRectangle(brush, leftX, leftY, barWidth - barSpacing, leftHeight);
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                        new PointF(rightX, rightY + rightHeight), new PointF(rightX + barWidth - barSpacing, rightY),
-                        rightColor, Color.FromArgb(80, rightColor)))
-                        g.FillRectangle(brush, rightX, rightY, barWidth - barSpacing, rightHeight);
-                        
-                    using (Pen gridPen = new Pen(Color.FromArgb(100, leftColor), 1))
-                        for (int line = 0; line < 3; line++)
-                        {
-                            float lineY = leftY + (leftHeight / 3) * line;
-                            g.DrawLine(gridPen, leftX, lineY, leftX + barWidth - barSpacing, lineY);
-                        }
-                    using (Pen gridPen = new Pen(Color.FromArgb(100, rightColor), 1))
-                        for (int line = 0; line < 3; line++)
-                        {
-                            float lineY = rightY + (rightHeight / 3) * line;
-                            g.DrawLine(gridPen, rightX, lineY, rightX + barWidth - barSpacing, lineY);
-                        }
+                    g.FillRectangle(brush, x, y, barWidth - barSpacing, h);
                 }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
+
+                using (Pen gridPen = new Pen(Color.FromArgb(100, barColorToUse), 1))
                 {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
-
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
-
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                        new PointF(x, y + h), new PointF(x + barWidth - barSpacing, y),
-                        barColorToUse, Color.FromArgb(80, barColorToUse)))
-                        g.FillRectangle(brush, x, y, barWidth - barSpacing, h);
-
-                    using (Pen gridPen = new Pen(Color.FromArgb(100, barColorToUse), 1))
-                        for (int line = 0; line < 3; line++)
-                        {
-                            float lineY = y + (h / 3) * line;
-                            g.DrawLine(gridPen, x, lineY, x + barWidth - barSpacing, lineY);
-                        }
+                    for (int line = 0; line < 3; line++)
+                    {
+                        float lineY = y + (h / 3) * line;
+                        g.DrawLine(gridPen, x, lineY, x + barWidth - barSpacing, lineY);
+                    }
                 }
             }
         }
@@ -494,50 +289,24 @@ namespace NekoBeats
             float heightMultiplier = barHeight / 100f;
             int pixelSize = 4;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
-                {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    
-                    using (SolidBrush brush = new SolidBrush(leftColor))
-                        for (float py = leftY; py < clientSize.Height; py += pixelSize)
-                            for (float px = leftX; px < leftX + barWidth - barSpacing; px += pixelSize)
-                                g.FillRectangle(brush, px, py, pixelSize, pixelSize);
-                    using (SolidBrush brush = new SolidBrush(rightColor))
-                        for (float py = rightY; py < clientSize.Height; py += pixelSize)
-                            for (float px = rightX; px < rightX + barWidth - barSpacing; px += pixelSize)
-                                g.FillRectangle(brush, px, py, pixelSize, pixelSize);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
-                {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
 
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
 
-                    using (SolidBrush brush = new SolidBrush(barColorToUse))
-                        for (float py = y; py < clientSize.Height; py += pixelSize)
-                            for (float px = x; px < x + barWidth - barSpacing; px += pixelSize)
-                                g.FillRectangle(brush, px, py, pixelSize, pixelSize);
+                using (SolidBrush brush = new SolidBrush(barColorToUse))
+                {
+                    for (float py = y; py < clientSize.Height; py += pixelSize)
+                    {
+                        for (float px = x; px < x + barWidth - barSpacing; px += pixelSize)
+                        {
+                            g.FillRectangle(brush, px, py, pixelSize, pixelSize);
+                        }
+                    }
                 }
             }
         }
@@ -546,92 +315,39 @@ namespace NekoBeats
         {
             float barWidth = (float)clientSize.Width / barCount;
             float heightMultiplier = barHeight / 100f;
+
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            if (mirrorMode)
+            for (int i = 0; i < barCount; i++)
             {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
-                {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    Color leftColor = GetBarColor(leftHeight, clientSize.Height, i);
-                    Color rightColor = GetBarColor(rightHeight, clientSize.Height, barCount - 1 - i);
-                    
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    float leftMidX = leftX + (barWidth - barSpacing) / 2;
-                    float rightMidX = rightX + (barWidth - barSpacing) / 2;
-                    
-                    using (GraphicsPath path = new GraphicsPath())
-                    {
-                        path.AddBezier(new PointF(leftX, leftY + leftHeight), new PointF(leftX, leftY), new PointF(leftMidX, leftY), new PointF(leftMidX, leftY));
-                        path.AddBezier(new PointF(leftMidX, leftY), new PointF(leftX + barWidth - barSpacing, leftY), new PointF(leftX + barWidth - barSpacing, leftY + leftHeight), new PointF(leftX + barWidth - barSpacing, leftY + leftHeight));
-                        path.CloseFigure();
-                        using (SolidBrush brush = new SolidBrush(leftColor))
-                            g.FillPath(brush, path);
-                    }
-                    
-                    using (GraphicsPath path = new GraphicsPath())
-                    {
-                        path.AddBezier(new PointF(rightX, rightY + rightHeight), new PointF(rightX, rightY), new PointF(rightMidX, rightY), new PointF(rightMidX, rightY));
-                        path.AddBezier(new PointF(rightMidX, rightY), new PointF(rightX + barWidth - barSpacing, rightY), new PointF(rightX + barWidth - barSpacing, rightY + rightHeight), new PointF(rightX + barWidth - barSpacing, rightY + rightHeight));
-                        path.CloseFigure();
-                        using (SolidBrush brush = new SolidBrush(rightColor))
-                            g.FillPath(brush, path);
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
-                {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
+                float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+                if (h < 2) h = 2;
 
-                    Color barColorToUse = GetBarColor(h, clientSize.Height, i);
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
+                Color barColorToUse = GetBarColor(h, clientSize.Height, i);
+                float x = i * barWidth;
+                float y = clientSize.Height - h;
+
+                using (GraphicsPath path = new GraphicsPath())
+                {
                     float midX = x + (barWidth - barSpacing) / 2;
+                    path.AddBezier(
+                        new PointF(x, y + h),
+                        new PointF(x, y),
+                        new PointF(midX, y),
+                        new PointF(midX, y)
+                    );
+                    path.AddBezier(
+                        new PointF(midX, y),
+                        new PointF(x + barWidth - barSpacing, y),
+                        new PointF(x + barWidth - barSpacing, y + h),
+                        new PointF(x + barWidth - barSpacing, y + h)
+                    );
+                    path.CloseFigure();
 
-                    using (GraphicsPath path = new GraphicsPath())
+                    using (SolidBrush brush = new SolidBrush(barColorToUse))
                     {
-                        path.AddBezier(new PointF(x, y + h), new PointF(x, y), new PointF(midX, y), new PointF(midX, y));
-                        path.AddBezier(new PointF(midX, y), new PointF(x + barWidth - barSpacing, y), new PointF(x + barWidth - barSpacing, y + h), new PointF(x + barWidth - barSpacing, y + h));
-                        path.CloseFigure();
-
-                        using (SolidBrush brush = new SolidBrush(barColorToUse))
-                            g.FillPath(brush, path);
+                        g.FillPath(brush, path);
                     }
-                }
-            }
-        }
-
-        private void DrawWaveform(Graphics g, Size clientSize)
-        {
-            if (smoothedBarValues == null) return;
-            
-            float width = clientSize.Width;
-            float height = clientSize.Height;
-            float centerY = height / 2;
-            
-            using (Pen pen = new Pen(barColor, 2))
-            {
-                for (int i = 0; i < smoothedBarValues.Length - 1 && i < barCount - 1; i++)
-                {
-                    float x1 = i * (width / barCount);
-                    float y1 = centerY + (smoothedBarValues[i] * centerY);
-                    float x2 = (i + 1) * (width / barCount);
-                    float y2 = centerY + (smoothedBarValues[i + 1] * centerY);
-                    
-                    pen.Color = GetBarColor(smoothedBarValues[i], height, i);
-                    g.DrawLine(pen, x1, y1, x2, y2);
                 }
             }
         }
@@ -641,15 +357,21 @@ namespace NekoBeats
             if (!fadeEffectEnabled)
             {
                 for (int i = 0; i < smoothedBarValues.Length && i < fadeValues.Length; i++)
+                {
                     fadeValues[i] = smoothedBarValues[i];
+                }
                 return;
             }
 
             for (int i = 0; i < fadeValues.Length; i++)
+            {
                 fadeValues[i] = Math.Max(0, fadeValues[i] - fadeEffectSpeed);
+            }
 
             for (int i = 0; i < smoothedBarValues.Length && i < fadeValues.Length; i++)
+            {
                 fadeValues[i] = Math.Max(fadeValues[i], smoothedBarValues[i]);
+            }
         }
 
         public void SetGradient(Color[] colors)
