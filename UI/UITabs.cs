@@ -177,7 +177,8 @@ namespace NekoBeats
             colorCycleCheck.CheckedChanged += (s, e) => visualizer.Logic.colorCycling = colorCycleCheck.Checked;
             gy += 35;
 
-            colorSpeedTrack = AddSliderControl(colorGroup, "Color Speed:", 20, gy, 1, 100, (int)(visualizer.Logic.colorSpeed * 10));
+            int colorSpeedDefault = Math.Clamp((int)(visualizer.Logic.colorSpeed * 10), 1, 100);
+            colorSpeedTrack = AddSliderControl(colorGroup, "Color Speed:", 20, gy, 1, 100, colorSpeedDefault);
             colorSpeedTrack.ValueChanged += (s, e) => visualizer.Logic.colorSpeed = colorSpeedTrack.Value / 10f;
 
             currentTabPanel.Controls.Add(colorGroup);
@@ -193,7 +194,8 @@ namespace NekoBeats
             bloomCheck.CheckedChanged += (s, e) => visualizer.Logic.bloomEnabled = bloomCheck.Checked;
             gy += 35;
 
-            bloomIntensityTrack = AddSliderControl(fxGroup, "Bloom Intensity:", 20, gy, 0, 50, (int)visualizer.Logic.bloomIntensity);
+            int bloomDefault = Math.Clamp((int)visualizer.Logic.bloomIntensity, 0, 50);
+            bloomIntensityTrack = AddSliderControl(fxGroup, "Bloom Intensity:", 20, gy, 0, 50, bloomDefault);
             bloomIntensityTrack.ValueChanged += (s, e) => visualizer.Logic.bloomIntensity = bloomIntensityTrack.Value;
             gy += 45;
 
