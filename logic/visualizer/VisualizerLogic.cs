@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 
 namespace NekoBeats
 {
@@ -16,7 +17,7 @@ namespace NekoBeats
         // Visual effects
         private List<Particle> particles;
         private Random random = new Random();
-        private float bloomIntensity = 0;
+        public float bloomIntensity = 0;
         private float colorHue = 0;
         
         // Settings
