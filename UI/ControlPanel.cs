@@ -276,7 +276,8 @@ namespace NekoBeats
                     bloomCheck.CheckedChanged += (s, e) => visualizer.Logic.bloomEnabled = bloomCheck.Checked;
                     gy += 35;
 
-                    bloomIntensityTrack = AddSliderControl(fxGroup, "Bloom Intensity:", 20, gy, 0, 50, visualizer.Logic.bloomIntensity);
+                    int bloomDefault = (int)visualizer.Logic.bloomIntensity;
+                    bloomIntensityTrack = AddSliderControl(fxGroup, "Bloom Intensity:", 20, gy, 0, 50, bloomDefault);
                     bloomIntensityTrack.ValueChanged += (s, e) => visualizer.Logic.bloomIntensity = bloomIntensityTrack.Value;
                     gy += 45;
 
