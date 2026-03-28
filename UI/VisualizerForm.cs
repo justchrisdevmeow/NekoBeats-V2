@@ -67,29 +67,35 @@ namespace NekoBeats
         }
 
         private void InitializeForm()
-        {
-            this.Text = "NekoBeats V2.3.3";
+{
+    this.Text = "NekoBeats V2.3.4";
 
-            if (File.Exists("NekoBeatsLogo.ico"))
-            {
-                this.Icon = new Icon("NekoBeatsLogo.ico");
-            }
+    if (File.Exists("NekoBeatsLogo.ico"))
+    {
+        this.Icon = new Icon("NekoBeatsLogo.ico");
+    }
 
-            this.WindowState = FormWindowState.Maximized;
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.TopMost = true;
-            this.ShowInTaskbar = false;
-            this.Paint += OnPaint;
-            this.FormClosing += OnFormClosing;
-            this.Resize += OnResize;
-            this.MouseDown += OnMouseDown;
-            this.MouseMove += OnMouseMove;
-            this.MouseUp += OnMouseUp;
+    this.WindowState = FormWindowState.Maximized;
+    this.FormBorderStyle = FormBorderStyle.None;
+    this.BackColor = Color.Magenta;
+    this.TransparencyKey = Color.Magenta;
+    this.TopMost = true;
+    this.DoubleBuffered = true;
+    this.ShowInTaskbar = false;
+    this.Paint += OnPaint;
+    this.FormClosing += OnFormClosing;
+    this.Resize += OnResize;
+    this.MouseDown += OnMouseDown;
+    this.MouseMove += OnMouseMove;
+    this.MouseUp += OnMouseUp;
 
-            // Make window layered for overlay mode
-            int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
-            SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-        }
+    int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
+    SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+    
+    this.Visible = true;
+    this.BringToFront();
+    this.Invalidate();
+}
 
         private void InitializeLogic()
         {
@@ -137,79 +143,32 @@ namespace NekoBeats
             }
         }
 
-        public void SetStreamingMode(bool enable)
-        {
-            streamingMode = enable;
-
-            if (enable)
-            {
-                this.FormBorderStyle = FormBorderStyle.Sizable;
-                this.ShowInTaskbar = true;
-                this.TopMost = false;
-                this.BackColor = Color.Black;
-                this.TransparencyKey = Color.Empty;
-                this.WindowState = FormWindowState.Normal;
-                this.Size = new Size(1280, 720);
-                this.Text = "NekoBeats V2.3.3 - Streaming Mode";
-                SetClickThrough(false);
-                
-                // Remove layered window for streaming mode (better performance)
-                int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
-                SetWindowLong(this.Handle, GWL_EXSTYLE, style & ~WS_EX_LAYERED);
-            }
-            else
-            {
-                this.FormBorderStyle = FormBorderStyle.None;
-                this.ShowInTaskbar = false;
-                this.TopMost = true;
-                this.BackColor = Color.Magenta;
-                this.TransparencyKey = Color.Magenta;
-                this.WindowState = FormWindowState.Maximized;
-                this.Text = "NekoBeats V2.3.3";
-                SetClickThrough(true);
-                
-                // Re-enable layered window for overlay mode
-                int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
-                SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED);
-            }
-            
-            this.Invalidate();
-        }
-
         private void OnPaint(object sender, PaintEventArgs e)
         {
-            if (streamingMode)
-            {
-                // Streaming mode: fast GDI+ drawing
-                e.Graphics.Clear(Color.Black);
-                logic.RenderCustomBackground(e.Graphics, this.ClientSize);
-                logic.Render(e.Graphics, this.ClientSize);
-            }
-            else
-            {
-                // Overlay mode: layered window with per-pixel alpha
-                DrawWithLayeredWindow();
-            }
+            // Overlay mode: layered window with per-pixel alpha
+            DrawWithLayeredWindow();
         }
 
         private void DrawWithLayeredWindow()
+{
+    try
+    {
+        Logger.Log($"DrawWithLayeredWindow - Size: {this.ClientSize.Width}x{this.ClientSize.Height}, Opacity: {logic.opacity}");
+        
+        using (Bitmap bitmap = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
+        using (Graphics g = Graphics.FromImage(bitmap))
         {
-            // Create bitmap with alpha channel
-            using (Bitmap bitmap = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                // Clear to fully transparent
-                g.Clear(Color.Transparent);
-                
-                // Draw everything with proper alpha
-                logic.RenderCustomBackground(g, this.ClientSize);
-                logic.Render(g, this.ClientSize);
-                
-                // Update layered window
-                UpdateLayeredWindow(bitmap);
-            }
+            g.Clear(Color.Transparent);
+            logic.RenderCustomBackground(g, this.ClientSize);
+            logic.Render(g, this.ClientSize);
+            UpdateLayeredWindow(bitmap);
         }
-
+    }
+    catch (Exception ex)
+    {
+        Logger.Log($"DrawWithLayeredWindow ERROR: {ex.Message}");
+    }
+}
         private void UpdateLayeredWindow(Bitmap bitmap)
         {
             IntPtr screenDc = GetDC(IntPtr.Zero);
@@ -242,7 +201,7 @@ namespace NekoBeats
 
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (logic.draggable && e.Button == MouseButtons.Left && !streamingMode)
+            if (logic.draggable && e.Button == MouseButtons.Left)
             {
                 SetClickThrough(false);
                 

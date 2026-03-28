@@ -12,7 +12,7 @@ namespace NekoBeats
 {
     static class Program
     {
-        private const string CURRENT_VERSION = "2.3.3";
+        private const string CURRENT_VERSION = "2.3.4";
         private const string GITHUB_REPO = "justdev-chris/NekoBeats-V2";
         private const string GITHUB_RELEASES_URL = "https://github.com/" + GITHUB_REPO + "/releases";
 
@@ -365,7 +365,7 @@ namespace NekoBeats
             float sum = 0;
             int count = Math.Min(12, visualizerForm.Logic.barCount);
             for (int i = 0; i < count; i++)
-                sum += visualizerForm.Logic.smoothedBarValues[i];
+                sum += visualizerForm.Logic.BarLogic.barRenderer.smoothedBarValues[i];
             return sum / count;
         }
 
