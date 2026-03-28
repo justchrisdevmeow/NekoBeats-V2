@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
@@ -14,9 +15,39 @@ namespace NekoBeats
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
+        [DllImport("user32.dll")]
+        private static extern bool UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref Point pptDst, ref Size psize, IntPtr hdcSrc, ref Point pprSrc, uint crKey, ref BLENDFUNCTION pblend, uint dwFlags);
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteDC(IntPtr hdc);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_LAYERED = 0x80000;
         private const int WS_EX_TRANSPARENT = 0x20;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct BLENDFUNCTION
+        {
+            public byte BlendOp;
+            public byte BlendFlags;
+            public byte SourceConstantAlpha;
+            public byte AlphaFormat;
+        }
 
         private VisualizerLogic logic;
         private Timer renderTimer;
@@ -24,6 +55,8 @@ namespace NekoBeats
 
         private Point dragStart;
         private bool isDragging = false;
+
+        public bool streamingMode = false;
 
         public VisualizerForm(PluginLoader loader)
         {
@@ -35,17 +68,16 @@ namespace NekoBeats
 
         private void InitializeForm()
         {
-            this.Text = "NekoBeats V2.3.4";
+            this.Text = "NekoBeats V2.3.3";
 
             if (File.Exists("NekoBeatsLogo.ico"))
+            {
                 this.Icon = new Icon("NekoBeatsLogo.ico");
+            }
 
             this.WindowState = FormWindowState.Maximized;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.BackColor = Color.Magenta;
-            this.TransparencyKey = Color.Magenta;
             this.TopMost = true;
-            this.DoubleBuffered = true;
             this.ShowInTaskbar = false;
             this.Paint += OnPaint;
             this.FormClosing += OnFormClosing;
@@ -95,16 +127,110 @@ namespace NekoBeats
         {
             int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
             if (enable)
+            {
                 SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+            }
             else
+            {
                 SetWindowLong(this.Handle, GWL_EXSTYLE, style & ~WS_EX_TRANSPARENT);
+            }
+        }
+
+        public void SetStreamingMode(bool enable)
+        {
+            streamingMode = enable;
+
+            if (enable)
+            {
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.ShowInTaskbar = true;
+                this.TopMost = false;
+                this.BackColor = Color.Black;
+                this.TransparencyKey = Color.Empty;
+                this.WindowState = FormWindowState.Normal;
+                this.Size = new Size(1280, 720);
+                this.Text = "NekoBeats V2.3.3 - Streaming Mode";
+                SetClickThrough(false);
+                
+                int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
+                SetWindowLong(this.Handle, GWL_EXSTYLE, style & ~WS_EX_LAYERED);
+                
+                this.Show();
+                this.BringToFront();
+                this.Invalidate();
+            }
+            else
+            {
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.ShowInTaskbar = false;
+                this.TopMost = true;
+                this.BackColor = Color.Magenta;
+                this.TransparencyKey = Color.Magenta;
+                this.WindowState = FormWindowState.Maximized;
+                this.Text = "NekoBeats V2.3.3";
+                SetClickThrough(true);
+                
+                int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
+                SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED);
+                
+                this.Show();
+                this.BringToFront();
+                this.Invalidate();
+            }
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
-            e.Graphics.Clear(Color.Magenta);
-            logic.RenderCustomBackground(e.Graphics, this.ClientSize);
-            logic.Render(e.Graphics, this.ClientSize);
+            if (streamingMode)
+            {
+                e.Graphics.Clear(Color.Black);
+                logic.RenderCustomBackground(e.Graphics, this.ClientSize);
+                logic.Render(e.Graphics, this.ClientSize);
+            }
+            else
+            {
+                DrawWithLayeredWindow();
+            }
+        }
+
+        private void DrawWithLayeredWindow()
+        {
+            if (this.ClientSize.Width <= 0 || this.ClientSize.Height <= 0)
+                return;
+                
+            using (Bitmap bitmap = new Bitmap(this.ClientSize.Width, this.ClientSize.Height, PixelFormat.Format32bppArgb))
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.Clear(Color.Transparent);
+                logic.RenderCustomBackground(g, this.ClientSize);
+                logic.Render(g, this.ClientSize);
+                UpdateLayeredWindow(bitmap);
+            }
+        }
+
+        private void UpdateLayeredWindow(Bitmap bitmap)
+        {
+            IntPtr screenDc = GetDC(IntPtr.Zero);
+            IntPtr memDc = CreateCompatibleDC(screenDc);
+            IntPtr hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
+            IntPtr oldBitmap = SelectObject(memDc, hBitmap);
+            
+            Size size = this.ClientSize;
+            Point pointSource = new Point(0, 0);
+            Point topPos = new Point(this.Left, this.Top);
+            
+            BLENDFUNCTION blend = new BLENDFUNCTION();
+            blend.BlendOp = 0;
+            blend.BlendFlags = 0;
+            blend.SourceConstantAlpha = (byte)(logic.opacity * 255);
+            blend.AlphaFormat = 1;
+            
+            UpdateLayeredWindow(this.Handle, screenDc, ref topPos, ref size, memDc, ref pointSource, 0, ref blend, 2);
+            
+            SelectObject(memDc, oldBitmap);
+            DeleteObject(hBitmap);
+            DeleteDC(memDc);
+            ReleaseDC(IntPtr.Zero, screenDc);
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
@@ -114,7 +240,7 @@ namespace NekoBeats
 
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (logic.draggable && e.Button == MouseButtons.Left)
+            if (logic.draggable && e.Button == MouseButtons.Left && !streamingMode)
             {
                 SetClickThrough(false);
                 
@@ -148,10 +274,26 @@ namespace NekoBeats
             }
         }
 
-        public void SavePreset(string filename) => logic.SavePreset(filename);
-        public void LoadPreset(string filename) => logic.LoadPreset(filename);
-        public void SetCustomBackground(string imagePath) => logic.SetCustomBackground(imagePath);
-        public void ClearCustomBackground() => logic.ClearCustomBackground();
+        public void SavePreset(string filename)
+        {
+            logic.SavePreset(filename);
+        }
+
+        public void LoadPreset(string filename)
+        {
+            logic.LoadPreset(filename);
+        }
+
+        public void SetCustomBackground(string imagePath)
+        {
+            logic.SetCustomBackground(imagePath);
+        }
+
+        public void ClearCustomBackground()
+        {
+            logic.ClearCustomBackground();
+        }
+
         public VisualizerLogic Logic => logic;
     }
 }
