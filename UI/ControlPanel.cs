@@ -35,6 +35,10 @@ namespace NekoBeats
         private CheckBox clickThroughCheck;
         private CheckBox draggableCheck;
         private CheckBox fadeEffectCheck;
+        private CheckBox mirrorModeCheck;
+        private CheckBox waveformCheck;
+        private CheckBox spectrumCheck;
+        private CheckBox invertColorsCheck;
 
         private Color darkBg = Color.FromArgb(10, 10, 15);
         private Color neonCyan = Color.FromArgb(0, 255, 200);
@@ -91,7 +95,7 @@ namespace NekoBeats
 
         private void InitializeComponents()
         {
-            this.Text = "NekoBeats Control";
+            this.Text = LanguageManager.Get("WindowTitle");
             this.Size = new Size(950, 750);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(50, 50);
@@ -114,12 +118,13 @@ namespace NekoBeats
             };
 
             string[] tabs = { "VIZ", "COLORS", "FX", "AUDIO", "WINDOW", "PRESETS", "CREDITS" };
+            string[] tabKeys = { "VIZTab", "COLORSTab", "FXTab", "AUDIOTab", "WINDOWTab", "PRESETSTab", "CREDITSTab" };
 
-            foreach (string tabName in tabs)
+            for (int i = 0; i < tabs.Length; i++)
             {
                 var tabBtn = new Button
                 {
-                    Text = tabName,
+                    Text = LanguageManager.Get(tabKeys[i]),
                     Location = new Point(nextTabX, 8),
                     Size = new Size(75, 29),
                     BackColor = Color.FromArgb(30, 30, 40),
@@ -130,7 +135,8 @@ namespace NekoBeats
                 };
                 tabBtn.FlatAppearance.BorderColor = dimText;
                 tabBtn.FlatAppearance.BorderSize = 1;
-                tabBtn.Click += (s, e) => ShowTab(((Button)s).Text);
+                string tabName = tabs[i];
+                tabBtn.Click += (s, e) => ShowTab(tabName);
                 tabButtonPanel.Controls.Add(tabBtn);
                 nextTabX += 82;
             }
@@ -162,11 +168,39 @@ namespace NekoBeats
                 Padding = new Padding(8)
             };
 
-            var resetBtn = new Button { Text = "RESET", Location = new Point(10, 12), Size = new Size(85, 31), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 10, FontStyle.Bold), Cursor = Cursors.Hand };
-            resetBtn.Click += (s, e) => { var result = MessageBox.Show("Reset all settings to default?", "Confirm Reset", MessageBoxButtons.YesNo); if (result == DialogResult.Yes) { visualizer.Logic.ResetToDefault(); ShowTab("VIZ"); } };
+            var resetBtn = new Button 
+            { 
+                Text = LanguageManager.Get("Reset"), 
+                Location = new Point(10, 12), 
+                Size = new Size(85, 31), 
+                BackColor = neonCyan, 
+                ForeColor = Color.Black, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = new Font("Courier New", 10, FontStyle.Bold), 
+                Cursor = Cursors.Hand 
+            };
+            resetBtn.Click += (s, e) => 
+            { 
+                var result = MessageBox.Show(LanguageManager.Get("ResetConfirm"), LanguageManager.Get("ConfirmReset"), MessageBoxButtons.YesNo); 
+                if (result == DialogResult.Yes) 
+                { 
+                    visualizer.Logic.ResetToDefault(); 
+                    ShowTab("VIZ"); 
+                } 
+            };
             footerPanel.Controls.Add(resetBtn);
 
-            var exitBtn = new Button { Text = "EXIT", Location = new Point(850, 12), Size = new Size(85, 31), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 10, FontStyle.Bold), Cursor = Cursors.Hand };
+            var exitBtn = new Button 
+            { 
+                Text = LanguageManager.Get("Exit"), 
+                Location = new Point(850, 12), 
+                Size = new Size(85, 31), 
+                BackColor = neonCyan, 
+                ForeColor = Color.Black, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = new Font("Courier New", 10, FontStyle.Bold), 
+                Cursor = Cursors.Hand 
+            };
             exitBtn.Click += (s, e) => Environment.Exit(0);
             footerPanel.Controls.Add(exitBtn);
 
@@ -184,210 +218,301 @@ namespace NekoBeats
             switch (tabName)
             {
                 case "VIZ":
-                    var vizGroup = CreateGroupBox("Visualization", 10, y, 900, 320);
+                    var vizGroup = CreateGroupBox(LanguageManager.Get("Visualization"), 10, y, 900, 520);
                     int gy = 25;
 
-                    barCountTrack = AddSliderControl(vizGroup, "Bar Count:", ref gy, 32, 512, visualizer.Logic.barCount);
-                    barCountTrack.ValueChanged += (s, e) => visualizer.Logic.barCount = barCountTrack.Value;
+                    var barCountLabel = new Label { Text = LanguageManager.Get("BarCount"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    vizGroup.Controls.Add(barCountLabel);
+                    var barCountValue = new Label { Text = visualizer.Logic.barCount.ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    vizGroup.Controls.Add(barCountValue);
+                    barCountTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 32, Maximum = 512, Value = visualizer.Logic.barCount, TickStyle = TickStyle.None, BackColor = boxBg };
+                    barCountTrack.ValueChanged += (s, e) => { visualizer.Logic.barCount = barCountTrack.Value; barCountValue.Text = barCountTrack.Value.ToString(); visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(barCountTrack);
+                    gy += 45;
 
-                    barHeightTrack = AddSliderControl(vizGroup, "Bar Height:", ref gy, 20, 400, visualizer.Logic.barHeight);
-                    barHeightTrack.ValueChanged += (s, e) => visualizer.Logic.barHeight = barHeightTrack.Value;
+                    var barHeightLabel = new Label { Text = LanguageManager.Get("BarHeight"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    vizGroup.Controls.Add(barHeightLabel);
+                    var barHeightValue = new Label { Text = visualizer.Logic.barHeight.ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    vizGroup.Controls.Add(barHeightValue);
+                    barHeightTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 20, Maximum = 400, Value = visualizer.Logic.barHeight, TickStyle = TickStyle.None, BackColor = boxBg };
+                    barHeightTrack.ValueChanged += (s, e) => { visualizer.Logic.barHeight = barHeightTrack.Value; barHeightValue.Text = barHeightTrack.Value.ToString(); visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(barHeightTrack);
+                    gy += 45;
 
-                    opacityTrack = AddSliderControl(vizGroup, "Opacity:", ref gy, 0, 100, (int)(visualizer.Logic.opacity * 100));
-                    opacityTrack.ValueChanged += (s, e) => visualizer.Logic.opacity = opacityTrack.Value / 100f;
+                    var opacityLabel = new Label { Text = LanguageManager.Get("Opacity"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    vizGroup.Controls.Add(opacityLabel);
+                    var opacityValue = new Label { Text = ((int)(visualizer.Logic.opacity * 100)).ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    vizGroup.Controls.Add(opacityValue);
+                    opacityTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 0, Maximum = 100, Value = (int)(visualizer.Logic.opacity * 100), TickStyle = TickStyle.None, BackColor = boxBg };
+                    opacityTrack.ValueChanged += (s, e) => { visualizer.Logic.opacity = opacityTrack.Value / 100f; opacityValue.Text = opacityTrack.Value.ToString(); visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(opacityTrack);
+                    gy += 45;
 
-                    spacingTrack = AddSliderControl(vizGroup, "Bar Spacing:", ref gy, 0, 10, visualizer.Logic.barSpacing);
-                    spacingTrack.ValueChanged += (s, e) => visualizer.Logic.barSpacing = spacingTrack.Value;
+                    var spacingLabel = new Label { Text = LanguageManager.Get("BarSpacing"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    vizGroup.Controls.Add(spacingLabel);
+                    var spacingValue = new Label { Text = visualizer.Logic.barSpacing.ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    vizGroup.Controls.Add(spacingValue);
+                    spacingTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 0, Maximum = 10, Value = visualizer.Logic.barSpacing, TickStyle = TickStyle.None, BackColor = boxBg };
+                    spacingTrack.ValueChanged += (s, e) => { visualizer.Logic.barSpacing = spacingTrack.Value; spacingValue.Text = spacingTrack.Value.ToString(); visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(spacingTrack);
+                    gy += 45;
+
+                    mirrorModeCheck = new CheckBox { Text = LanguageManager.Get("MirrorMode"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.MirrorMode };
+                    mirrorModeCheck.CheckedChanged += (s, e) => { visualizer.Logic.MirrorMode = mirrorModeCheck.Checked; visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(mirrorModeCheck);
+                    gy += 35;
+
+                    waveformCheck = new CheckBox { Text = LanguageManager.Get("WaveformView"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.WaveformMode };
+                    waveformCheck.CheckedChanged += (s, e) => { visualizer.Logic.WaveformMode = waveformCheck.Checked; visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(waveformCheck);
+                    gy += 35;
+
+                    spectrumCheck = new CheckBox { Text = LanguageManager.Get("SpectrumAnalyzer"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.SpectrumMode };
+                    spectrumCheck.CheckedChanged += (s, e) => { visualizer.Logic.SpectrumMode = spectrumCheck.Checked; visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(spectrumCheck);
+                    gy += 35;
+
+                    invertColorsCheck = new CheckBox { Text = LanguageManager.Get("InvertColors"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.InvertColors };
+                    invertColorsCheck.CheckedChanged += (s, e) => { visualizer.Logic.InvertColors = invertColorsCheck.Checked; visualizer.Invalidate(); };
+                    vizGroup.Controls.Add(invertColorsCheck);
+                    gy += 35;
 
                     currentTabPanel.Controls.Add(vizGroup);
                     break;
 
                 case "COLORS":
-                    var colorGroup = CreateGroupBox("Colors & Effects", 10, y, 900, 420);
+                    var colorGroup = CreateGroupBox(LanguageManager.Get("ColorsEffects"), 10, y, 900, 450);
                     gy = 25;
 
-                    var colorBtn = new Button { Text = "Bar Color", Location = new Point(20, gy), Size = new Size(100, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
+                    var colorBtn = new Button { Text = LanguageManager.Get("BarColor"), Location = new Point(20, gy), Size = new Size(100, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
                     colorBtn.Click += (s, e) => ShowColorDialog();
                     colorGroup.Controls.Add(colorBtn);
                     gy += 45;
 
-                    rainbowCheck = AddCheckboxControl(colorGroup, "Rainbow Bars", 20, gy);
-                    rainbowCheck.Checked = visualizer.Logic.rainbowBars;
-                    rainbowCheck.CheckedChanged += (s, e) => visualizer.Logic.rainbowBars = rainbowCheck.Checked;
+                    rainbowCheck = new CheckBox { Text = LanguageManager.Get("RainbowBars"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.rainbowBars };
+                    rainbowCheck.CheckedChanged += (s, e) => { visualizer.Logic.rainbowBars = rainbowCheck.Checked; visualizer.Invalidate(); };
+                    colorGroup.Controls.Add(rainbowCheck);
                     gy += 35;
 
-                    var labelTheme = new Label { Text = "Bar Theme:", Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
-                    colorGroup.Controls.Add(labelTheme);
-                    themeCombo = new ComboBox { Location = new Point(170, gy), Size = new Size(220, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(30, 30, 40), ForeColor = neonCyan, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9) };
+                    var themeLabel = new Label { Text = LanguageManager.Get("BarTheme"), Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
+                    colorGroup.Controls.Add(themeLabel);
+                    themeCombo = new ComboBox { Location = new Point(170, gy), Size = new Size(220, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(30, 30, 40), ForeColor = neonCyan, FlatStyle = FlatStyle.Flat };
                     themeCombo.Items.AddRange(System.Enum.GetNames(typeof(BarRenderer.BarTheme)));
                     themeCombo.SelectedIndex = (int)visualizer.Logic.BarLogic.currentTheme;
-                    themeCombo.SelectedIndexChanged += (s, e) => visualizer.Logic.BarLogic.currentTheme = (BarRenderer.BarTheme)themeCombo.SelectedIndex;
+                    themeCombo.SelectedIndexChanged += (s, e) => { visualizer.Logic.BarLogic.currentTheme = (BarRenderer.BarTheme)themeCombo.SelectedIndex; visualizer.Invalidate(); };
                     colorGroup.Controls.Add(themeCombo);
                     gy += 40;
 
-                    gradientToggle = AddCheckboxControl(colorGroup, "Rainbow Gradient", 20, gy);
-                    gradientToggle.Checked = visualizer.Logic.useGradient;
+                    gradientToggle = new CheckBox { Text = LanguageManager.Get("RainbowGradient"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.useGradient };
                     gradientToggle.CheckedChanged += (s, e) =>
                     {
                         if (gradientToggle.Checked)
                         {
-                            Color[] gradient = new Color[] {
-                                Color.Red, Color.Yellow, Color.Green,
-                                Color.Cyan, Color.Blue, Color.Magenta
-                            };
+                            Color[] gradient = new Color[] { Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta };
                             visualizer.Logic.ApplyGradient(gradient);
                         }
                         else
                         {
                             visualizer.Logic.ClearGradient();
                         }
+                        visualizer.Invalidate();
                     };
+                    colorGroup.Controls.Add(gradientToggle);
                     gy += 35;
 
-                    colorCycleCheck = AddCheckboxControl(colorGroup, "Color Cycle", 20, gy);
-                    colorCycleCheck.Checked = visualizer.Logic.colorCycling;
-                    colorCycleCheck.CheckedChanged += (s, e) => visualizer.Logic.colorCycling = colorCycleCheck.Checked;
+                    colorCycleCheck = new CheckBox { Text = LanguageManager.Get("ColorCycle"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.colorCycling };
+                    colorCycleCheck.CheckedChanged += (s, e) => { visualizer.Logic.colorCycling = colorCycleCheck.Checked; visualizer.Invalidate(); };
+                    colorGroup.Controls.Add(colorCycleCheck);
                     gy += 35;
 
-                    colorSpeedTrack = AddSliderControl(colorGroup, "Color Speed:", 20, gy, 1, 100, (int)(visualizer.Logic.colorSpeed * 10));
-                    colorSpeedTrack.ValueChanged += (s, e) => visualizer.Logic.colorSpeed = colorSpeedTrack.Value / 10f;
+                    var colorSpeedLabel = new Label { Text = LanguageManager.Get("ColorSpeed"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    colorGroup.Controls.Add(colorSpeedLabel);
+                    var colorSpeedValue = new Label { Text = ((int)(visualizer.Logic.colorSpeed * 10)).ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    colorGroup.Controls.Add(colorSpeedValue);
+                    colorSpeedTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 1, Maximum = 100, Value = (int)(visualizer.Logic.colorSpeed * 10), TickStyle = TickStyle.None, BackColor = boxBg };
+                    colorSpeedTrack.ValueChanged += (s, e) => { visualizer.Logic.colorSpeed = colorSpeedTrack.Value / 10f; colorSpeedValue.Text = colorSpeedTrack.Value.ToString(); visualizer.Invalidate(); };
+                    colorGroup.Controls.Add(colorSpeedTrack);
 
                     currentTabPanel.Controls.Add(colorGroup);
                     break;
 
                 case "FX":
-                    var fxGroup = CreateGroupBox("Effects", 10, y, 900, 480);
+                    var fxGroup = CreateGroupBox(LanguageManager.Get("Effects"), 10, y, 900, 550);
                     gy = 25;
 
-                    bloomCheck = AddCheckboxControl(fxGroup, "Bloom", 20, gy);
-                    bloomCheck.Checked = visualizer.Logic.bloomEnabled;
-                    bloomCheck.CheckedChanged += (s, e) => visualizer.Logic.bloomEnabled = bloomCheck.Checked;
+                    bloomCheck = new CheckBox { Text = LanguageManager.Get("Bloom"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.bloomEnabled };
+                    bloomCheck.CheckedChanged += (s, e) => { visualizer.Logic.bloomEnabled = bloomCheck.Checked; visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(bloomCheck);
                     gy += 35;
 
-                    bloomIntensityTrack = AddSliderControl(fxGroup, "Bloom Intensity:", 20, gy, 0, 50, visualizer.Logic.bloomIntensity);
-                    bloomIntensityTrack.ValueChanged += (s, e) => visualizer.Logic.bloomIntensity = bloomIntensityTrack.Value;
+                    var bloomLabel = new Label { Text = LanguageManager.Get("BloomIntensity"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    fxGroup.Controls.Add(bloomLabel);
+                    var bloomValue = new Label { Text = visualizer.Logic.bloomIntensity.ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    fxGroup.Controls.Add(bloomValue);
+                    bloomIntensityTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 0, Maximum = 50, Value = visualizer.Logic.bloomIntensity, TickStyle = TickStyle.None, BackColor = boxBg };
+                    bloomIntensityTrack.ValueChanged += (s, e) => { visualizer.Logic.bloomIntensity = bloomIntensityTrack.Value; bloomValue.Text = bloomIntensityTrack.Value.ToString(); visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(bloomIntensityTrack);
                     gy += 45;
 
-                    particlesCheck = AddCheckboxControl(fxGroup, "Particles", 20, gy);
-                    particlesCheck.Checked = visualizer.Logic.particlesEnabled;
-                    particlesCheck.CheckedChanged += (s, e) =>
-                    {
-                        visualizer.Logic.particlesEnabled = particlesCheck.Checked;
-                        if (particlesCheck.Checked && visualizer.Handle != IntPtr.Zero)
-                            visualizer.Logic.ResetParticles(visualizer.ClientSize);
-                    };
+                    particlesCheck = new CheckBox { Text = LanguageManager.Get("Particles"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.particlesEnabled };
+                    particlesCheck.CheckedChanged += (s, e) => { visualizer.Logic.particlesEnabled = particlesCheck.Checked; visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(particlesCheck);
                     gy += 35;
 
-                    particleCountTrack = AddSliderControl(fxGroup, "Particle Count:", 20, gy, 10, 500, visualizer.Logic.particleCount);
-                    particleCountTrack.ValueChanged += (s, e) => visualizer.Logic.particleCount = particleCountTrack.Value;
+                    var particleLabel = new Label { Text = LanguageManager.Get("ParticleCount"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    fxGroup.Controls.Add(particleLabel);
+                    var particleValue = new Label { Text = visualizer.Logic.particleCount.ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    fxGroup.Controls.Add(particleValue);
+                    particleCountTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 10, Maximum = 500, Value = visualizer.Logic.particleCount, TickStyle = TickStyle.None, BackColor = boxBg };
+                    particleCountTrack.ValueChanged += (s, e) => { visualizer.Logic.particleCount = particleCountTrack.Value; particleValue.Text = particleCountTrack.Value.ToString(); visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(particleCountTrack);
                     gy += 45;
 
-                    circleModeCheck = AddCheckboxControl(fxGroup, "Circle Mode", 20, gy);
-                    circleModeCheck.Checked = visualizer.Logic.BarLogic.isCircleMode;
-                    circleModeCheck.CheckedChanged += (s, e) => visualizer.Logic.BarLogic.isCircleMode = circleModeCheck.Checked;
+                    circleModeCheck = new CheckBox { Text = LanguageManager.Get("CircleMode"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.BarLogic.isCircleMode };
+                    circleModeCheck.CheckedChanged += (s, e) => { visualizer.Logic.BarLogic.isCircleMode = circleModeCheck.Checked; visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(circleModeCheck);
                     gy += 35;
 
-                    circleRadiusTrack = AddSliderControl(fxGroup, "Circle Radius:", 20, gy, 50, 500, (int)visualizer.Logic.circleRadius);
-                    circleRadiusTrack.ValueChanged += (s, e) => visualizer.Logic.circleRadius = circleRadiusTrack.Value;
+                    var radiusLabel = new Label { Text = LanguageManager.Get("CircleRadius"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    fxGroup.Controls.Add(radiusLabel);
+                    var radiusValue = new Label { Text = visualizer.Logic.circleRadius.ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    fxGroup.Controls.Add(radiusValue);
+                    circleRadiusTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 50, Maximum = 500, Value = (int)visualizer.Logic.circleRadius, TickStyle = TickStyle.None, BackColor = boxBg };
+                    circleRadiusTrack.ValueChanged += (s, e) => { visualizer.Logic.circleRadius = circleRadiusTrack.Value; radiusValue.Text = circleRadiusTrack.Value.ToString(); visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(circleRadiusTrack);
                     gy += 45;
 
-                    fadeEffectCheck = AddCheckboxControl(fxGroup, "Fade Effect", 20, gy);
-                    fadeEffectCheck.Checked = visualizer.Logic.fadeEffectEnabled;
-                    fadeEffectCheck.CheckedChanged += (s, e) => visualizer.Logic.fadeEffectEnabled = fadeEffectCheck.Checked;
+                    fadeEffectCheck = new CheckBox { Text = LanguageManager.Get("FadeEffect"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.fadeEffectEnabled };
+                    fadeEffectCheck.CheckedChanged += (s, e) => { visualizer.Logic.fadeEffectEnabled = fadeEffectCheck.Checked; visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(fadeEffectCheck);
                     gy += 35;
 
-                    fadeSpeedTrack = AddSliderControl(fxGroup, "Fade Speed:", 20, gy, 1, 100, (int)(visualizer.Logic.fadeEffectSpeed * 100));
-                    fadeSpeedTrack.ValueChanged += (s, e) => visualizer.Logic.fadeEffectSpeed = fadeSpeedTrack.Value / 100f;
+                    var fadeLabel = new Label { Text = LanguageManager.Get("FadeSpeed"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    fxGroup.Controls.Add(fadeLabel);
+                    var fadeValue = new Label { Text = ((int)(visualizer.Logic.fadeEffectSpeed * 100)).ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    fxGroup.Controls.Add(fadeValue);
+                    fadeSpeedTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 1, Maximum = 100, Value = (int)(visualizer.Logic.fadeEffectSpeed * 100), TickStyle = TickStyle.None, BackColor = boxBg };
+                    fadeSpeedTrack.ValueChanged += (s, e) => { visualizer.Logic.fadeEffectSpeed = fadeSpeedTrack.Value / 100f; fadeValue.Text = fadeSpeedTrack.Value.ToString(); visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(fadeSpeedTrack);
 
                     currentTabPanel.Controls.Add(fxGroup);
                     break;
 
                 case "AUDIO":
-                    var audioGroup = CreateGroupBox("Audio Settings", 10, y, 900, 240);
+                    var audioGroup = CreateGroupBox(LanguageManager.Get("AudioSettings"), 10, y, 900, 350);
                     gy = 25;
 
-                    sensitivityTrack = AddSliderControl(audioGroup, "Sensitivity:", 20, gy, 1, 300, (int)(visualizer.Logic.sensitivity * 100));
-                    sensitivityTrack.ValueChanged += (s, e) => visualizer.Logic.sensitivity = sensitivityTrack.Value / 100f;
+                    var deviceLabel = new Label { Text = LanguageManager.Get("AudioDevice"), Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
+                    audioGroup.Controls.Add(deviceLabel);
+                    var audioDeviceCombo = new ComboBox { Location = new Point(170, gy), Size = new Size(320, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(30, 30, 40), ForeColor = neonCyan, FlatStyle = FlatStyle.Flat };
+                    var devices = visualizer.Logic.GetAudioDevices();
+                    foreach (var device in devices)
+                        audioDeviceCombo.Items.Add(device);
+                    audioDeviceCombo.SelectedIndex = 0;
+                    audioDeviceCombo.SelectedIndexChanged += (s, e) => visualizer.Logic.SetAudioDevice(audioDeviceCombo.SelectedIndex);
+                    audioGroup.Controls.Add(audioDeviceCombo);
                     gy += 45;
 
-                    smoothSpeedTrack = AddSliderControl(audioGroup, "Smooth Speed:", 20, gy, 1, 100, (int)(visualizer.Logic.smoothSpeed * 100));
-                    smoothSpeedTrack.ValueChanged += (s, e) => visualizer.Logic.smoothSpeed = smoothSpeedTrack.Value / 100f;
+                    var sensitivityLabel = new Label { Text = LanguageManager.Get("Sensitivity"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    audioGroup.Controls.Add(sensitivityLabel);
+                    var sensitivityValue = new Label { Text = ((int)(visualizer.Logic.sensitivity * 100)).ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    audioGroup.Controls.Add(sensitivityValue);
+                    sensitivityTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 1, Maximum = 300, Value = (int)(visualizer.Logic.sensitivity * 100), TickStyle = TickStyle.None, BackColor = boxBg };
+                    sensitivityTrack.ValueChanged += (s, e) => { visualizer.Logic.sensitivity = sensitivityTrack.Value / 100f; sensitivityValue.Text = sensitivityTrack.Value.ToString(); visualizer.Invalidate(); };
+                    audioGroup.Controls.Add(sensitivityTrack);
                     gy += 45;
 
-                    latencyTrack = AddSliderControl(audioGroup, "Latency Comp (ms):", 20, gy, 0, 200, visualizer.Logic.latencyCompensationMs);
-                    latencyTrack.ValueChanged += (s, e) => visualizer.Logic.SetLatencyCompensation(latencyTrack.Value);
+                    var smoothLabel = new Label { Text = LanguageManager.Get("SmoothSpeed"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    audioGroup.Controls.Add(smoothLabel);
+                    var smoothValue = new Label { Text = ((int)(visualizer.Logic.smoothSpeed * 100)).ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    audioGroup.Controls.Add(smoothValue);
+                    smoothSpeedTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 1, Maximum = 100, Value = (int)(visualizer.Logic.smoothSpeed * 100), TickStyle = TickStyle.None, BackColor = boxBg };
+                    smoothSpeedTrack.ValueChanged += (s, e) => { visualizer.Logic.smoothSpeed = smoothSpeedTrack.Value / 100f; smoothValue.Text = smoothSpeedTrack.Value.ToString(); visualizer.Invalidate(); };
+                    audioGroup.Controls.Add(smoothSpeedTrack);
+                    gy += 45;
+
+                    var latencyLabel = new Label { Text = LanguageManager.Get("LatencyComp"), Location = new Point(20, gy), Size = new Size(140, 20), ForeColor = dimText };
+                    audioGroup.Controls.Add(latencyLabel);
+                    var latencyValue = new Label { Text = visualizer.Logic.latencyCompensationMs.ToString(), Location = new Point(800, gy), Size = new Size(70, 20), ForeColor = neonCyan, TextAlign = ContentAlignment.TopRight };
+                    audioGroup.Controls.Add(latencyValue);
+                    latencyTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 0, Maximum = 200, Value = visualizer.Logic.latencyCompensationMs, TickStyle = TickStyle.None, BackColor = boxBg };
+                    latencyTrack.ValueChanged += (s, e) => { visualizer.Logic.SetLatencyCompensation(latencyTrack.Value); latencyValue.Text = latencyTrack.Value.ToString(); };
+                    audioGroup.Controls.Add(latencyTrack);
 
                     currentTabPanel.Controls.Add(audioGroup);
                     break;
 
                 case "WINDOW":
-                    var windowGroup = CreateGroupBox("Window & Display", 10, y, 900, 280);
+                    var windowGroup = CreateGroupBox(LanguageManager.Get("WindowDisplay"), 10, y, 900, 500);
                     gy = 25;
 
-                    var labelFps = new Label { Text = "FPS Limit:", Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
-                    windowGroup.Controls.Add(labelFps);
-                    fpsCombo = new ComboBox { Location = new Point(170, gy), Size = new Size(220, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(30, 30, 40), ForeColor = neonCyan, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9) };
-                    fpsCombo.Items.AddRange(new string[] { "30", "60", "120", "Uncapped" });
+                    var fpsLabel = new Label { Text = LanguageManager.Get("FPSLimit"), Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
+                    windowGroup.Controls.Add(fpsLabel);
+                    fpsCombo = new ComboBox { Location = new Point(170, gy), Size = new Size(220, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(30, 30, 40), ForeColor = neonCyan };
+                    fpsCombo.Items.AddRange(new string[] { "30", "60", "120", LanguageManager.Get("Uncapped") });
                     fpsCombo.SelectedIndex = visualizer.Logic.fpsLimit switch { 30 => 0, 60 => 1, 120 => 2, _ => 3 };
                     fpsCombo.SelectedIndexChanged += (s, e) => { visualizer.Logic.fpsLimit = fpsCombo.Text switch { "30" => 30, "60" => 60, "120" => 120, _ => 999 }; visualizer.UpdateFPSTimer(); };
                     windowGroup.Controls.Add(fpsCombo);
                     gy += 45;
 
-                    clickThroughCheck = AddCheckboxControl(windowGroup, "Click Through", 20, gy);
-                    clickThroughCheck.Checked = visualizer.Logic.clickThrough;
+                    clickThroughCheck = new CheckBox { Text = LanguageManager.Get("ClickThrough"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.clickThrough };
                     clickThroughCheck.CheckedChanged += (s, e) => { visualizer.Logic.clickThrough = clickThroughCheck.Checked; visualizer.SetClickThrough(visualizer.Logic.clickThrough); };
+                    windowGroup.Controls.Add(clickThroughCheck);
                     gy += 35;
 
-                    draggableCheck = AddCheckboxControl(windowGroup, "Draggable", 20, gy);
-                    draggableCheck.Checked = visualizer.Logic.draggable;
-                    draggableCheck.CheckedChanged += (s, e) => visualizer.Logic.draggable = draggableCheck.Checked;
+                    draggableCheck = new CheckBox { Text = LanguageManager.Get("Draggable"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.draggable };
+                    draggableCheck.CheckedChanged += (s, e) => { visualizer.Logic.draggable = draggableCheck.Checked; };
+                    windowGroup.Controls.Add(draggableCheck);
                     gy += 35;
 
-                    // Monitor selection
-                    var monitorLabel = new Label { Text = "Monitor:", Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
+                    var monitorLabel = new Label { Text = LanguageManager.Get("Monitor"), Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
                     windowGroup.Controls.Add(monitorLabel);
-                    
-                    ComboBox monitorCombo = new ComboBox 
-                    { 
-                        Location = new Point(170, gy), 
-                        Size = new Size(220, 25), 
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        BackColor = Color.FromArgb(30, 30, 40),
-                        ForeColor = neonCyan
-                    };
-                    
+                    var monitorCombo = new ComboBox { Location = new Point(170, gy), Size = new Size(220, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(30, 30, 40), ForeColor = neonCyan };
                     for (int i = 0; i < Screen.AllScreens.Length; i++)
                     {
                         var screen = Screen.AllScreens[i];
                         monitorCombo.Items.Add($"{screen.DeviceName} - {screen.Bounds.Width}x{screen.Bounds.Height}");
                     }
                     monitorCombo.SelectedIndex = 0;
-                    
-                    monitorCombo.SelectedIndexChanged += (s, e) =>
-{
-    if (monitorCombo.SelectedIndex >= 0)
-        visualizer.SetMonitor(monitorCombo.SelectedIndex);
-};
+                    monitorCombo.SelectedIndexChanged += (s, e) => { visualizer.SetMonitor(monitorCombo.SelectedIndex); };
                     windowGroup.Controls.Add(monitorCombo);
                     gy += 45;
 
-                    var bgBtn = new Button { Text = "Set Background", Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
-                    bgBtn.Click += (s, e) => { var dialog = new OpenFileDialog { Filter = "Image Files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp" }; if (dialog.ShowDialog() == DialogResult.OK) { visualizer.Logic.SetCustomBackground(dialog.FileName); MessageBox.Show("Background set!"); } };
+                    var spanBtn = new Button { Text = LanguageManager.Get("SpanAll"), Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
+                    spanBtn.Click += (s, e) => visualizer.SpanAllMonitors();
+                    windowGroup.Controls.Add(spanBtn);
+                    gy += 45;
+
+                    var cloneBtn = new Button { Text = LanguageManager.Get("CloneAll"), Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
+                    cloneBtn.Click += (s, e) =>
+                    {
+                        foreach (var screen in Screen.AllScreens)
+                        {
+                            var clone = new VisualizerForm(null);
+                            clone.SetMonitor(Array.IndexOf(Screen.AllScreens, screen));
+                            clone.Show();
+                        }
+                    };
+                    windowGroup.Controls.Add(cloneBtn);
+                    gy += 45;
+
+                    var bgBtn = new Button { Text = LanguageManager.Get("SetBackground"), Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
+                    bgBtn.Click += (s, e) => { var dialog = new OpenFileDialog { Filter = "Image Files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp" }; if (dialog.ShowDialog() == DialogResult.OK) { visualizer.Logic.SetCustomBackground(dialog.FileName); MessageBox.Show(LanguageManager.Get("BackgroundSet")); } };
                     windowGroup.Controls.Add(bgBtn);
                     gy += 35;
 
-                    var clearBgBtn = new Button { Text = "Clear Background", Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat, Font = new Font("Courier New", 9, FontStyle.Bold), Cursor = Cursors.Hand };
-                    clearBgBtn.Click += (s, e) => { visualizer.Logic.ClearCustomBackground(); MessageBox.Show("Background cleared!"); };
+                    var clearBgBtn = new Button { Text = LanguageManager.Get("ClearBackground"), Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
+                    clearBgBtn.Click += (s, e) => { visualizer.Logic.ClearCustomBackground(); MessageBox.Show(LanguageManager.Get("BackgroundCleared")); };
                     windowGroup.Controls.Add(clearBgBtn);
 
                     currentTabPanel.Controls.Add(windowGroup);
                     break;
 
                 case "PRESETS":
-                    var presetsGroup = CreateGroupBox("Presets & Plugins", 10, y, 900, 650);
+                    var presetsGroup = CreateGroupBox(LanguageManager.Get("PresetsPlugins"), 10, y, 900, 650);
                     gy = 25;
 
-                    var pluginLabel = new Label { Text = "Plugins", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
+                    var pluginLabel = new Label { Text = LanguageManager.Get("Plugins"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
                     presetsGroup.Controls.Add(pluginLabel);
                     gy += 30;
 
@@ -420,18 +545,19 @@ namespace NekoBeats
                         }
                         else
                         {
-                            presetsGroup.Controls.Add(new Label { Text = "No plugins loaded", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) });
+                            var noPluginsLabel = new Label { Text = LanguageManager.Get("NoPlugins"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+                            presetsGroup.Controls.Add(noPluginsLabel);
                             gy += 30;
                         }
                     }
                     else
                     {
-                        presetsGroup.Controls.Add(new Label { Text = "No plugins loaded", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) });
+                        var noPluginsLabel = new Label { Text = LanguageManager.Get("NoPlugins"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+                        presetsGroup.Controls.Add(noPluginsLabel);
                         gy += 30;
                     }
 
-                    // NBP Presets
-                    var nbpLabel = new Label { Text = "NBP Presets (Settings)", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
+                    var nbpLabel = new Label { Text = LanguageManager.Get("NBPPresets"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
                     presetsGroup.Controls.Add(nbpLabel);
                     gy += 30;
 
@@ -452,6 +578,7 @@ namespace NekoBeats
                                 {
                                     if (checkbox.Checked) { visualizer.Logic.LoadPreset(file); SaveActivePreset(presetName); }
                                     else RemoveActivePreset(presetName);
+                                    visualizer.Invalidate();
                                 };
                                 presetsGroup.Controls.Add(checkbox);
                                 gy += 30;
@@ -459,18 +586,19 @@ namespace NekoBeats
                         }
                         else
                         {
-                            presetsGroup.Controls.Add(new Label { Text = "No NBP presets found", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) });
+                            var noPresetsLabel = new Label { Text = LanguageManager.Get("NoNBPPresets"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+                            presetsGroup.Controls.Add(noPresetsLabel);
                             gy += 30;
                         }
                     }
                     else
                     {
-                        presetsGroup.Controls.Add(new Label { Text = "No NBP presets found", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) });
+                        var noPresetsLabel = new Label { Text = LanguageManager.Get("NoNBPPresets"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+                        presetsGroup.Controls.Add(noPresetsLabel);
                         gy += 30;
                     }
 
-                    // NBBAR Presets — separate from NBP
-                    var nbbarLabel = new Label { Text = "NBBAR Presets (Bar Themes)", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
+                    var nbbarLabel = new Label { Text = LanguageManager.Get("NBBARPresets"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold) };
                     presetsGroup.Controls.Add(nbbarLabel);
                     gy += 30;
 
@@ -488,6 +616,7 @@ namespace NekoBeats
                                 {
                                     if (checkbox.Checked) { visualizer.Logic.LoadBarPreset(file); SaveActivePreset(presetName); }
                                     else RemoveActivePreset(presetName);
+                                    visualizer.Invalidate();
                                 };
                                 presetsGroup.Controls.Add(checkbox);
                                 gy += 30;
@@ -495,13 +624,15 @@ namespace NekoBeats
                         }
                         else
                         {
-                            presetsGroup.Controls.Add(new Label { Text = "No NBBAR presets found", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) });
+                            var noPresetsLabel = new Label { Text = LanguageManager.Get("NoNBBARPresets"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+                            presetsGroup.Controls.Add(noPresetsLabel);
                             gy += 30;
                         }
                     }
                     else
                     {
-                        presetsGroup.Controls.Add(new Label { Text = "No NBBAR presets found", Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) });
+                        var noPresetsLabel = new Label { Text = LanguageManager.Get("NoNBBARPresets"), Location = new Point(20, gy), Size = new Size(860, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
+                        presetsGroup.Controls.Add(noPresetsLabel);
                         gy += 30;
                     }
 
@@ -509,7 +640,7 @@ namespace NekoBeats
                     break;
 
                 case "CREDITS":
-                    var creditsGroup = CreateGroupBox("About", 10, y, 900, 340);
+                    var creditsGroup = CreateGroupBox(LanguageManager.Get("About"), 10, y, 900, 340);
                     gy = 25;
 
                     if (File.Exists("NekoBeatsLogo.png"))
@@ -519,22 +650,22 @@ namespace NekoBeats
                         gy += 130;
                     }
 
-                    var createdLabel = new Label { Text = "Created by: justdev-chris", Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold), AutoSize = false };
+                    var createdLabel = new Label { Text = LanguageManager.Get("CreatedBy"), Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = neonCyan, Font = new Font("Courier New", 10, FontStyle.Bold), AutoSize = false };
                     creditsGroup.Controls.Add(createdLabel);
                     gy += 35;
 
-                    var versionLabel = new Label { Text = "NekoBeats V2.3.3", Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = dimText, Font = new Font("Courier New", 10), AutoSize = false };
+                    var versionLabel = new Label { Text = LanguageManager.Get("Version"), Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = dimText, Font = new Font("Courier New", 10), AutoSize = false };
                     creditsGroup.Controls.Add(versionLabel);
                     gy += 35;
 
-                    var githubLabel = new Label { Text = "github.com/justdev-chris/NekoBeats-V2", Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = neonCyan, Font = new Font("Courier New", 9, FontStyle.Underline), AutoSize = false, Cursor = Cursors.Hand };
+                    var githubLabel = new Label { Text = LanguageManager.Get("GitHub"), Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = neonCyan, Font = new Font("Courier New", 9, FontStyle.Underline), AutoSize = false, Cursor = Cursors.Hand };
                     githubLabel.Click += (s, e) => { try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = "https://github.com/justdev-chris/NekoBeats-V2", UseShellExecute = true }); } catch { } };
                     creditsGroup.Controls.Add(githubLabel);
                     gy += 45;
 
                     var uninstallBtn = new Button
                     {
-                        Text = "Uninstall NekoBeats",
+                        Text = LanguageManager.Get("Uninstall"),
                         Location = new Point(20, gy),
                         Size = new Size(180, 32),
                         BackColor = Color.FromArgb(80, 20, 20),
@@ -546,7 +677,7 @@ namespace NekoBeats
                     uninstallBtn.FlatAppearance.BorderColor = Color.FromArgb(255, 100, 100);
                     uninstallBtn.Click += (s, e) =>
                     {
-                        var confirm = MessageBox.Show("Are you sure you want to uninstall NekoBeats?", "Uninstall", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        var confirm = MessageBox.Show(LanguageManager.Get("UninstallConfirm"), LanguageManager.Get("Uninstall"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                         if (confirm == DialogResult.Yes)
                         {
                             string uninstallerPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "NekoBeats", "unins000.exe");
@@ -557,7 +688,7 @@ namespace NekoBeats
                             }
                             else
                             {
-                                MessageBox.Show("Uninstaller not found. Try uninstalling via Windows Settings.", "Not Found", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                MessageBox.Show(LanguageManager.Get("UninstallNotFound"), LanguageManager.Get("NotFound"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                         }
                     };
@@ -587,46 +718,14 @@ namespace NekoBeats
             return gb;
         }
 
-        private TrackBar AddSliderControl(Control parent, string label, ref int y, int min, int max, int defaultVal)
-        {
-            var labelCtrl = new Label { Text = label, Location = new Point(20, y), Size = new Size(140, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
-            parent.Controls.Add(labelCtrl);
-
-            var valueLabel = new Label { Text = defaultVal.ToString(), Location = new Point(800, y), Size = new Size(70, 20), ForeColor = neonCyan, Font = new Font("Courier New", 9), TextAlign = ContentAlignment.TopRight };
-            parent.Controls.Add(valueLabel);
-
-            var trackBar = new TrackBar { Location = new Point(170, y - 5), Size = new Size(620, 45), Minimum = min, Maximum = max, Value = defaultVal, TickStyle = TickStyle.None, BackColor = boxBg };
-            trackBar.ValueChanged += (s, e) => valueLabel.Text = trackBar.Value.ToString();
-            parent.Controls.Add(trackBar);
-            y += 45;
-            return trackBar;
-        }
-
-        private TrackBar AddSliderControl(Control parent, string label, int x, int y, int min, int max, int defaultVal)
-        {
-            var labelCtrl = new Label { Text = label, Location = new Point(x, y), Size = new Size(140, 20), ForeColor = dimText, Font = new Font("Courier New", 9) };
-            parent.Controls.Add(labelCtrl);
-
-            var valueLabel = new Label { Text = defaultVal.ToString(), Location = new Point(x + 620, y), Size = new Size(70, 20), ForeColor = neonCyan, Font = new Font("Courier New", 9), TextAlign = ContentAlignment.TopRight };
-            parent.Controls.Add(valueLabel);
-
-            var trackBar = new TrackBar { Location = new Point(x + 150, y - 5), Size = new Size(460, 45), Minimum = min, Maximum = max, Value = defaultVal, TickStyle = TickStyle.None, BackColor = boxBg };
-            trackBar.ValueChanged += (s, e) => valueLabel.Text = trackBar.Value.ToString();
-            parent.Controls.Add(trackBar);
-            return trackBar;
-        }
-
-        private CheckBox AddCheckboxControl(Control parent, string label, int x, int y)
-        {
-            var checkbox = new CheckBox { Text = label, Location = new Point(x, y), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Font = new Font("Courier New", 9), Appearance = Appearance.Normal };
-            parent.Controls.Add(checkbox);
-            return checkbox;
-        }
-
         private void ShowColorDialog()
         {
             using var colorDialog = new ColorDialog { Color = visualizer.Logic.barColor };
-            if (colorDialog.ShowDialog() == DialogResult.OK) visualizer.Logic.barColor = colorDialog.Color;
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                visualizer.Logic.barColor = colorDialog.Color;
+                visualizer.Invalidate();
+            }
         }
 
         private List<string> LoadActivePresets()
