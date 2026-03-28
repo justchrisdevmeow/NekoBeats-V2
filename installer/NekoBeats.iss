@@ -16,6 +16,23 @@ SetupIconFile=NekoBeatsLogo.ico
 WizardImageFile=NekoBeatsBanner.bmp
 WizardImageStretch=yes
 
+; Language selection
+ShowLanguageDialog=yes
+LanguageDetectionMethod=uilanguage
+
+[Languages]
+Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
+Name: "fr"; MessagesFile: "compiler:Languages\French.isl"
+Name: "de"; MessagesFile: "compiler:Languages\German.isl"
+Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl"
+Name: "zh"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
+Name: "pt"; MessagesFile: "compiler:Languages\Portuguese.isl"
+Name: "it"; MessagesFile: "compiler:Languages\Italian.isl"
+Name: "ko"; MessagesFile: "compiler:Languages\Korean.isl"
+Name: "ar"; MessagesFile: "compiler:Languages\Arabic.isl"
+
 [Files]
 Source: "..\bin\Release\net8.0-windows\win-x64\publish\NekoBeats.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\bin\Release\net8.0-windows\win-x64\publish\*.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -35,6 +52,8 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\NekoBea
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\NekoBeats"; ValueType: string; ValueName: "UninstallString"; ValueData: "{uninstallexe}"
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\NekoBeats"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "{app}\NekoBeatsLogo.ico"
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\NekoBeats"; ValueType: string; ValueName: "Publisher"; ValueData: "justdev-chris"
+; Save selected language
+Root: HKCU; Subkey: "Software\NekoBeats"; ValueType: string; ValueName: "InstallerLanguage"; ValueData: "{language}"; Flags: uninsdeletekey
 
 [Run]
 Filename: "{app}\NekoBeats.exe"; Description: "Launch NekoBeats"; Flags: nowait postinstall skipifsilent
