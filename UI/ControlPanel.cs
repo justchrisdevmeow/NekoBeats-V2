@@ -365,24 +365,15 @@ namespace NekoBeats
                     
                     monitorCombo.SelectedIndexChanged += (s, e) =>
                     {
-                        if (monitorCombo.SelectedIndex < 0) return;
-                        var screen = Screen.AllScreens[monitorCombo.SelectedIndex];
-                        visualizer.Location = screen.Bounds.Location;
-                        visualizer.Size = screen.Bounds.Size;
-                        visualizer.Refresh();
+                        if (monitorCombo.SelectedIndex >= 0)
+                            visualizer.SetMonitor(monitorCombo.SelectedIndex);
                     };
                     windowGroup.Controls.Add(monitorCombo);
                     gy += 45;
                     
                     // Span button
                     Button spanBtn = new Button { Text = "Span All Monitors", Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black };
-                    spanBtn.Click += (s, e) =>
-                    {
-                        Rectangle bounds = Rectangle.Empty;
-                        foreach (var screen in Screen.AllScreens)
-                            bounds = Rectangle.Union(bounds, screen.Bounds);
-                        visualizer.SetBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height);
-                    };
+                    spanBtn.Click += (s, e) => visualizer.SpanAllMonitors();
                     windowGroup.Controls.Add(spanBtn);
                     gy += 45;
                     
@@ -390,28 +381,11 @@ namespace NekoBeats
                     Button cloneBtn = new Button { Text = "Clone on All Monitors", Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black };
                     cloneBtn.Click += (s, e) =>
                     {
-                        // Only create clones once
-                        List<VisualizerForm> clones = new List<VisualizerForm>();
                         foreach (var screen in Screen.AllScreens)
                         {
-                            // Check if monitor already has a clone
-                            bool exists = false;
-                            foreach (Form f in Application.OpenForms)
-                            {
-                                if (f is VisualizerForm vf && vf != visualizer && vf.Bounds.IntersectsWith(screen.Bounds))
-                                {
-                                    exists = true;
-                                    break;
-                                }
-                            }
-                            if (!exists)
-                            {
-                                var clone = new VisualizerForm(null);
-                                clone.Location = screen.Bounds.Location;
-                                clone.Size = screen.Bounds.Size;
-                                clone.Show();
-                                clones.Add(clone);
-                            }
+                            var clone = new VisualizerForm(null);
+                            clone.SetMonitor(Array.IndexOf(Screen.AllScreens, screen));
+                            clone.Show();
                         }
                     };
                     windowGroup.Controls.Add(cloneBtn);
