@@ -33,6 +33,10 @@ namespace NekoBeats
         public bool fadeEffectEnabled = false;
         public float fadeEffectSpeed = 0.5f;
         private float[] fadeValues = new float[512];
+        public bool mirrorMode = false;
+        public bool waveformMode = false;
+        public bool spectrumMode = false;
+        public bool invertColors = false;
 
         public BarRenderer(float[] smoothedValues, Color color, float sens, int height, int count, int spacing, bool rainbow)
         {
