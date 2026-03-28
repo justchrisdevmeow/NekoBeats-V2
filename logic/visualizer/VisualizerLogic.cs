@@ -150,14 +150,14 @@ namespace NekoBeats
         public void Render(Graphics g, Size clientSize)
         {
             barLogic.barRenderer.mirrorMode = mirrorMode;
-            barLogic.barRenderer.invertColors = invertColors;
-            barLogic.barRenderer.waveformMode = waveformMode;
+          //  barLogic.barRenderer.invertColors = invertColors; for later
+            // barLogic.barRenderer.waveformMode = waveformMode; for later
             barLogic.barRenderer.spectrumMode = spectrumMode;
             
-            if (waveformMode)
-                barLogic.barRenderer.SetWaveformData(audioCapture.GetWaveformData());
-            if (spectrumMode)
-                barLogic.barRenderer.SetSpectrumData(audioCapture.GetSpectrumData());
+          //  if (waveformMode)
+           //     barLogic.barRenderer.SetWaveformData(audioCapture.GetWaveformData()); LATER
+         //   if (spectrumMode)
+           //     barLogic.barRenderer.SetSpectrumData(audioCapture.GetSpectrumData()); LATER
             
             barLogic.barRenderer.smoothedBarValues = smoothedBarValues;
             barLogic.barRenderer.barColor = barColor;
@@ -169,7 +169,6 @@ namespace NekoBeats
             barLogic.barRenderer.opacity = opacity;
             barLogic.barRenderer.fadeEffectEnabled = fadeEffectEnabled;
             barLogic.barRenderer.fadeEffectSpeed = fadeEffectSpeed;
-            barLogic.isCircleMode = circleModeCheck.Checked;
             barLogic.circleRadius = circleRadius;
             
             barLogic.Render(g, clientSize);
