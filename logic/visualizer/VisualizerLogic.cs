@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace NekoBeats
 {
