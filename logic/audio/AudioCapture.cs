@@ -13,7 +13,6 @@ namespace NekoBeats
         private float[] waveformData;
         private int sampleRate;
         private int fftSize = 1024;
-        private int[] frequencyBands;
         private int selectedDevice = 0;
         private List<string> deviceList;
 
@@ -29,9 +28,6 @@ namespace NekoBeats
             spectrumData = new float[fftSize / 2];
             waveformData = new float[fftSize];
             fftBuffer = new float[fftSize];
-            
-            // Define frequency bands (bass, mid, treble ranges)
-            frequencyBands = new int[] { 0, 60, 250, 500, 2000, 4000, 8000, 16000 };
         }
 
         private void InitializeDevices()
@@ -41,10 +37,11 @@ namespace NekoBeats
             
             try
             {
-                for (int i = 0; i < WaveIn.DeviceCount; i++)
+                var enumerator = new NAudio.CoreAudioApi.MMDeviceEnumerator();
+                var devices = enumerator.EnumerateAudioEndPoints(NAudio.CoreAudioApi.DataFlow.Render, NAudio.CoreAudioApi.DeviceState.Active);
+                foreach (var device in devices)
                 {
-                    var caps = WaveIn.GetCapabilities(i);
-                    deviceList.Add($"{caps.ProductName}");
+                    deviceList.Add(device.FriendlyName);
                 }
             }
             catch { }
@@ -77,10 +74,12 @@ namespace NekoBeats
                 }
                 else
                 {
+                    var enumerator = new NAudio.CoreAudioApi.MMDeviceEnumerator();
+                    var devices = enumerator.EnumerateAudioEndPoints(NAudio.CoreAudioApi.DataFlow.Render, NAudio.CoreAudioApi.DeviceState.Active);
                     int deviceId = selectedDevice - 1;
-                    if (deviceId >= 0 && deviceId < WaveIn.DeviceCount)
+                    if (deviceId >= 0 && deviceId < devices.Count)
                     {
-                        capture = new WasapiLoopbackCapture(deviceId);
+                        capture = new WasapiLoopbackCapture(devices[deviceId]);
                     }
                     else
                     {
@@ -114,47 +113,43 @@ namespace NekoBeats
         {
             if (e.BytesRecorded == 0) return;
 
-            int bytesPerSample = 2; // 16-bit
+            int bytesPerSample = 2;
             int samples = e.BytesRecorded / bytesPerSample;
             float[] samplesFloat = new float[samples];
 
-            // Convert bytes to float
             for (int i = 0; i < samples; i++)
             {
                 short sample = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
                 samplesFloat[i] = sample / 32768f;
             }
 
-            // Update waveform data (raw audio)
             int waveformIndex = 0;
             for (int i = 0; i < Math.Min(samples, waveformData.Length); i += 2)
             {
                 waveformData[waveformIndex++] = samplesFloat[i];
             }
 
-            // Prepare FFT buffer
             int fftSamples = Math.Min(samples, fftSize);
+            Complex[] complexBuffer = new Complex[fftSize];
+            
             for (int i = 0; i < fftSamples; i++)
             {
-                fftBuffer[i] = samplesFloat[i] * (float)NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftSamples);
+                complexBuffer[i].X = samplesFloat[i] * (float)FastFourierTransform.HammingWindow(i, fftSamples);
+                complexBuffer[i].Y = 0;
             }
             for (int i = fftSamples; i < fftSize; i++)
             {
-                fftBuffer[i] = 0;
+                complexBuffer[i].X = 0;
+                complexBuffer[i].Y = 0;
             }
 
-            // Perform FFT
-            FastFourierTransform.FFT(true, (int)Math.Log(fftSize, 2), fftBuffer);
+            FastFourierTransform.FFT(true, (int)Math.Log(fftSize, 2), complexBuffer);
 
-            // Get spectrum magnitudes
             for (int i = 0; i < fftSize / 2; i++)
             {
-                float real = fftBuffer[i * 2];
-                float imag = fftBuffer[i * 2 + 1];
-                spectrumData[i] = (float)Math.Sqrt(real * real + imag * imag);
+                spectrumData[i] = (float)Math.Sqrt(complexBuffer[i].X * complexBuffer[i].X + complexBuffer[i].Y * complexBuffer[i].Y);
             }
 
-            // Convert to bar values
             UpdateBarValues();
         }
 
@@ -164,7 +159,6 @@ namespace NekoBeats
 
             if (BarCount <= fftSize / 2)
             {
-                // Direct mapping
                 for (int i = 0; i < BarCount; i++)
                 {
                     int index = i * (fftSize / 2 / BarCount);
@@ -173,7 +167,6 @@ namespace NekoBeats
             }
             else
             {
-                // Interpolate for more bars
                 for (int i = 0; i < BarCount; i++)
                 {
                     float index = (float)i / BarCount * (fftSize / 2);
@@ -184,7 +177,6 @@ namespace NekoBeats
                 }
             }
 
-            // Smooth and limit
             for (int i = 0; i < BarCount && i < SmoothedBarValues.Length; i++)
             {
                 float value = Math.Min(1f, newValues[i] * 2f);
