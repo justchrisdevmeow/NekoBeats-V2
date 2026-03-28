@@ -157,6 +157,7 @@ namespace NekoBeats
             barLogic.barRenderer.opacity = opacity;
             barLogic.barRenderer.fadeEffectEnabled = fadeEffectEnabled;
             barLogic.barRenderer.fadeEffectSpeed = fadeEffectSpeed;
+            barLogic.isCircleMode = circleModeCheck.Checked;
             barLogic.circleRadius = circleRadius;
             
             barLogic.Render(g, clientSize);
