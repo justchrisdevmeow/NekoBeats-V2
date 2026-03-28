@@ -65,62 +65,55 @@ namespace NekoBeats
             spectrumData = data;
         }
 
-        public void Render(Graphics g, Size clientSize)
-        {
-            if (waveformMode)
-            {
-                DrawWaveform(g, clientSize);
-            }
-            else if (spectrumMode)
-            {
-                DrawSpectrum(g, clientSize);
-            }
-            else
-            {
-                DrawBars(g, clientSize);
-            }
-        }
+        v
 
         private void DrawBars(Graphics g, Size clientSize)
+{
+    float barWidth = (float)clientSize.Width / barCount;
+    float heightMultiplier = barHeight / 100f;
+    
+    int barsDrawn = 0;
+    
+    if (mirrorMode)
+    {
+        int halfCount = barCount / 2;
+        for (int i = 0; i < halfCount; i++)
         {
-            float barWidth = (float)clientSize.Width / barCount;
-            float heightMultiplier = barHeight / 100f;
-
-            if (mirrorMode)
-            {
-                int halfCount = barCount / 2;
-                for (int i = 0; i < halfCount; i++)
-                {
-                    float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
-                    
-                    if (leftHeight < 2) leftHeight = 2;
-                    if (rightHeight < 2) rightHeight = 2;
-                    
-                    // Left bar
-                    float leftX = i * barWidth;
-                    float leftY = clientSize.Height - leftHeight;
-                    DrawBar(g, leftX, leftY, barWidth, leftHeight, i, clientSize.Height);
-                    
-                    // Right bar (mirrored)
-                    float rightX = (barCount - 1 - i) * barWidth;
-                    float rightY = clientSize.Height - rightHeight;
-                    DrawBar(g, rightX, rightY, barWidth, rightHeight, barCount - 1 - i, clientSize.Height);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < barCount; i++)
-                {
-                    float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
-                    if (h < 2) h = 2;
-                    
-                    float x = i * barWidth;
-                    float y = clientSize.Height - h;
-                    DrawBar(g, x, y, barWidth, h, i, clientSize.Height);
-                }
-            }
+            float leftHeight = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+            float rightHeight = GetBarHeight(barCount - 1 - i) * (clientSize.Height * heightMultiplier);
+            
+            if (leftHeight < 2) leftHeight = 2;
+            if (rightHeight < 2) rightHeight = 2;
+            
+            // Left bar
+            float leftX = i * barWidth;
+            float leftY = clientSize.Height - leftHeight;
+            DrawBar(g, leftX, leftY, barWidth, leftHeight, i, clientSize.Height);
+            
+            // Right bar (mirrored)
+            float rightX = (barCount - 1 - i) * barWidth;
+            float rightY = clientSize.Height - rightHeight;
+            DrawBar(g, rightX, rightY, barWidth, rightHeight, barCount - 1 - i, clientSize.Height);
+            
+            barsDrawn += 2;
         }
+    }
+    else
+    {
+        for (int i = 0; i < barCount; i++)
+        {
+            float h = GetBarHeight(i) * (clientSize.Height * heightMultiplier);
+            if (h < 2) h = 2;
+            
+            float x = i * barWidth;
+            float y = clientSize.Height - h;
+            DrawBar(g, x, y, barWidth, h, i, clientSize.Height);
+            barsDrawn++;
+        }
+    }
+    
+    Logger.Log($"DrawBars - Bars drawn: {barsDrawn}, First bar height: {GetBarHeight(0) * (clientSize.Height * heightMultiplier):F2}");
+}
 
         private void DrawBar(Graphics g, float x, float y, float width, float height, int index, float clientHeight)
         {
