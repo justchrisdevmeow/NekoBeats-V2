@@ -160,7 +160,7 @@ namespace NekoBeats
             barLogic.barRenderer.fadeEffectSpeed = fadeEffectSpeed;
             
             // Set circle mode properties
-            barLogic.isCircleMode = barLogic.isCircleMode;
+          //  barLogic.isCircleMode = barLogic.isCircleMode; this is set somewhere else
             barLogic.circleRadius = circleRadius;
             
             // Apply bloom effect
