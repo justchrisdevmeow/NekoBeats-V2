@@ -67,31 +67,35 @@ namespace NekoBeats
         }
 
         private void InitializeForm()
-        {
-            this.Text = "NekoBeats V2.3.4";
+{
+    this.Text = "NekoBeats V2.3.4";
 
-            if (File.Exists("NekoBeatsLogo.ico"))
-            {
-                this.Icon = new Icon("NekoBeatsLogo.ico");
-            }
+    if (File.Exists("NekoBeatsLogo.ico"))
+    {
+        this.Icon = new Icon("NekoBeatsLogo.ico");
+    }
 
-            this.WindowState = FormWindowState.Maximized;
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.BackColor = Color.Magenta;
-            this.TransparencyKey = Color.Magenta;
-            this.TopMost = true;
-            this.DoubleBuffered = true;
-            this.ShowInTaskbar = false;
-            this.Paint += OnPaint;
-            this.FormClosing += OnFormClosing;
-            this.Resize += OnResize;
-            this.MouseDown += OnMouseDown;
-            this.MouseMove += OnMouseMove;
-            this.MouseUp += OnMouseUp;
+    this.WindowState = FormWindowState.Maximized;
+    this.FormBorderStyle = FormBorderStyle.None;
+    this.BackColor = Color.Magenta;
+    this.TransparencyKey = Color.Magenta;
+    this.TopMost = true;
+    this.DoubleBuffered = true;
+    this.ShowInTaskbar = false;
+    this.Paint += OnPaint;
+    this.FormClosing += OnFormClosing;
+    this.Resize += OnResize;
+    this.MouseDown += OnMouseDown;
+    this.MouseMove += OnMouseMove;
+    this.MouseUp += OnMouseUp;
 
-            int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
-            SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-        }
+    int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
+    SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+    
+    this.Visible = true;
+    this.BringToFront();
+    this.Invalidate();
+}
 
         private void InitializeLogic()
         {
