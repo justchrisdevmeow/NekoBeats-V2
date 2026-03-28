@@ -45,6 +45,18 @@ namespace NekoBeats
         public bool waveformMode = false;
         public bool spectrumMode = false;
 
+        public bool MirrorMode 
+        { 
+            get => barLogic.barRenderer.mirrorMode; 
+            set => barLogic.barRenderer.mirrorMode = value; 
+        }
+
+        public bool WaveformMode 
+        { 
+            get => barLogic.barRenderer.waveformMode; 
+            set => barLogic.barRenderer.waveformMode = value; 
+        }
+
         public VisualizerLogic()
         {
             audioCapture = new AudioCapture();
