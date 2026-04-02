@@ -13,7 +13,7 @@ namespace NekoBeats
 {
     public class VisualizerLogic : IDisposable
     {
-        // Audio - USING OLD DIRECT FFT (no AudioCapture)
+        // Audio - Using system default audio output
         private WasapiLoopbackCapture capture;
         private float[] fftBuffer = new float[2048];
         private Complex[] fftComplex = new Complex[2048];
@@ -49,7 +49,7 @@ namespace NekoBeats
         public int particleCount = 100;
         public float circleRadius = 200f;
         
-        // v2.3.4 properties (KEEPING NEW FEATURES)
+        // v2.3.4 properties
         public bool WaveformMode { get; set; } = false;
         public bool SpectrumMode { get; set; } = false;
         
@@ -80,7 +80,7 @@ namespace NekoBeats
             }
         }
         
-        // V2.3.2 FEATURES (KEEPING)
+        // V2.3.2 FEATURES
         public int latencyCompensationMs = 0;
         public bool fadeEffectEnabled = false;
         public float fadeEffectSpeed = 0.5f;
@@ -96,6 +96,7 @@ namespace NekoBeats
         private Random random = new Random();
         private Bitmap bloomBuffer;
         private Graphics bloomGraphics;
+        private bool isAudioInitialized = false;
         
         public VisualizerLogic()
         {
@@ -114,13 +115,16 @@ namespace NekoBeats
         {
             try 
             {
+                // Use system default audio output (what the user hears)
                 capture = new WasapiLoopbackCapture();
                 capture.DataAvailable += OnData;
                 capture.StartRecording();
+                isAudioInitialized = true;
             } 
             catch (Exception ex) 
             {
-                MessageBox.Show("Audio init failed: " + ex.Message);
+                Console.WriteLine($"Audio init failed: {ex.Message}");
+                isAudioInitialized = false;
             }
         }
         
@@ -164,7 +168,6 @@ namespace NekoBeats
             }
         }
         
-        // OLD AUDIO PROCESSING - REACTIVE!
         private void OnData(object sender, WaveInEventArgs e)
         {
             for (int i = 0; i < e.BytesRecorded && fftPos < 2048; i += 4)
@@ -195,6 +198,13 @@ namespace NekoBeats
         
         public void UpdateSmoothing()
         {
+            if (!isAudioInitialized)
+            {
+                // Try to reinitialize if failed
+                InitializeAudio();
+                return;
+            }
+            
             // OLD SMOOTHING - MORE REACTIVE
             for (int i = 0; i < barCount; i++)
             {
@@ -236,7 +246,7 @@ namespace NekoBeats
             barLogic.barRenderer.currentTheme = barLogic.currentTheme;
             barLogic.barRenderer.waveformMode = WaveformMode;
             barLogic.barRenderer.spectrumMode = SpectrumMode;
-            barLogic.barRenderer.waveformData = GetWaveformData(); // Need to add this method
+            barLogic.barRenderer.waveformData = GetWaveformData();
             
             barLogic.Update();
             
@@ -253,7 +263,6 @@ namespace NekoBeats
             }
         }
         
-        // Helper for waveform data (creates fake waveform from FFT for now)
         private float[] GetWaveformData()
         {
             float[] waveform = new float[512];
@@ -416,35 +425,6 @@ namespace NekoBeats
         {
             if (barPreset != null)
                 barPreset.SaveToFile(filePath);
-        }
-        
-        public List<string> GetAudioDevices()
-        {
-            var devices = new List<string>();
-            for (int i = 0; i < WaveIn.DeviceCount; i++)
-            {
-                var caps = WaveIn.GetCapabilities(i);
-                devices.Add(caps.ProductName);
-            }
-            return devices;
-        }
-        
-        public void SetAudioDevice(int deviceIndex)
-        {
-            // Reinitialize capture with new device
-            capture?.StopRecording();
-            capture?.Dispose();
-            
-            try
-            {
-                capture = new WasapiLoopbackCapture();
-                capture.DataAvailable += OnData;
-                capture.StartRecording();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to switch audio device: {ex.Message}");
-            }
         }
         
         public void ResetToDefault()
