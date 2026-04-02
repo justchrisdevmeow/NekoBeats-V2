@@ -97,6 +97,7 @@ namespace NekoBeats
         private Bitmap bloomBuffer;
         private Graphics bloomGraphics;
         private bool isAudioInitialized = false;
+        private Size currentClientSize = new Size(1920, 1080); // Store current size for particles
         
         public VisualizerLogic()
         {
@@ -108,7 +109,9 @@ namespace NekoBeats
         
         public void Initialize(Size clientSize)
         {
+            currentClientSize = clientSize;
             InitializeBloomBuffer(clientSize);
+            ResetParticles(clientSize);
         }
         
         private void InitializeAudio()
@@ -147,6 +150,7 @@ namespace NekoBeats
         
         public void Resize(Size clientSize)
         {
+            currentClientSize = clientSize;
             InitializeBloomBuffer(clientSize);
             if (particlesEnabled) ResetParticles(clientSize);
         }
@@ -160,10 +164,10 @@ namespace NekoBeats
                 {
                     X = random.Next(0, Math.Max(1, clientSize.Width)),
                     Y = random.Next(0, Math.Max(1, clientSize.Height)),
-                    Size = random.Next(2, 6),
+                    Size = random.Next(2, 8),
                     SpeedX = (random.NextSingle() - 0.5f) * 2,
                     SpeedY = (random.NextSingle() - 0.5f) * 2,
-                    Life = random.Next(50, 200)
+                    Life = random.Next(50, 200) / 100f
                 });
             }
         }
@@ -280,22 +284,25 @@ namespace NekoBeats
                 audioLevel += smoothedBarValues[i];
             audioLevel /= 12;
             
-            if (audioLevel > 0.5f && random.Next(100) < 20)
+            // Spawn particles based on audio level
+            if (particlesEnabled && audioLevel > 0.3f && random.Next(100) < 25)
             {
-                for (int i = 0; i < 3; i++)
+                int spawnCount = random.Next(2, 6);
+                for (int i = 0; i < spawnCount; i++)
                 {
                     particles.Add(new Particle
                     {
-                        X = random.Next(0, Math.Max(1, 800)),
-                        Y = 600 - random.Next(100),
-                        SpeedX = (random.NextSingle() - 0.5f) * 2,
-                        SpeedY = (random.NextSingle() - 1.0f) * 2,
-                        Size = random.Next(2, 5),
+                        X = random.Next(0, Math.Max(1, currentClientSize.Width)),
+                        Y = random.Next((int)(currentClientSize.Height * 0.6f), (int)(currentClientSize.Height * 0.9f)),
+                        SpeedX = (random.NextSingle() - 0.5f) * 3,
+                        SpeedY = (random.NextSingle() - 1.5f) * 2,
+                        Size = random.Next(3, 8),
                         Life = 1.0f
                     });
                 }
             }
             
+            // Update and remove dead particles
             for (int i = particles.Count - 1; i >= 0; i--)
             {
                 Particle p = particles[i];
@@ -303,7 +310,8 @@ namespace NekoBeats
                 p.Y += p.SpeedY;
                 p.Life -= 0.02f;
                 
-                if (p.Life <= 0 || p.Y < 0 || p.X < 0 || p.X > 800)
+                // Remove if dead or off screen
+                if (p.Life <= 0 || p.Y < -50 || p.Y > currentClientSize.Height + 50 || p.X < -100 || p.X > currentClientSize.Width + 100)
                     particles.RemoveAt(i);
                 else
                     particles[i] = p;
@@ -347,7 +355,7 @@ namespace NekoBeats
             // Render visualization
             barLogic.Render(g, clientSize);
             
-            // Draw particles if enabled
+            // Draw particles if enabled (on top of bars)
             if (particlesEnabled && particles.Count > 0)
                 DrawParticles(g, clientSize);
             
@@ -360,9 +368,12 @@ namespace NekoBeats
             foreach (var p in particles)
             {
                 int alpha = (int)(p.Life * 200);
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, barColor)))
+                if (alpha > 0)
                 {
-                    g.FillEllipse(brush, p.X - 2, p.Y - 2, p.Size, p.Size);
+                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, barColor)))
+                    {
+                        g.FillEllipse(brush, p.X - p.Size / 2, p.Y - p.Size / 2, p.Size, p.Size);
+                    }
                 }
             }
         }
@@ -665,6 +676,10 @@ namespace NekoBeats
                     
                 if (root.TryGetProperty("spectrumMode", out var spectrumProp))
                     SpectrumMode = spectrumProp.GetBoolean();
+                    
+                // Reset particles with new size after loading preset
+                if (particlesEnabled && currentClientSize.Width > 0)
+                    ResetParticles(currentClientSize);
             } 
             catch (Exception ex)
             {
