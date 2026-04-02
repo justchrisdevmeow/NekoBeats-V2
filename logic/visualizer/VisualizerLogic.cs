@@ -13,7 +13,7 @@ namespace NekoBeats
 {
     public class VisualizerLogic : IDisposable
     {
-        // Audio
+        // Audio - USING OLD DIRECT FFT (no AudioCapture)
         private WasapiLoopbackCapture capture;
         private float[] fftBuffer = new float[2048];
         private Complex[] fftComplex = new Complex[2048];
@@ -49,7 +49,7 @@ namespace NekoBeats
         public int particleCount = 100;
         public float circleRadius = 200f;
         
-        // v2.3.4 properties
+        // v2.3.4 properties (KEEPING NEW FEATURES)
         public bool WaveformMode { get; set; } = false;
         public bool SpectrumMode { get; set; } = false;
         
@@ -80,7 +80,7 @@ namespace NekoBeats
             }
         }
         
-        // V2.3.2 NEW FEATURES
+        // V2.3.2 FEATURES (KEEPING)
         public int latencyCompensationMs = 0;
         public bool fadeEffectEnabled = false;
         public float fadeEffectSpeed = 0.5f;
@@ -96,11 +96,9 @@ namespace NekoBeats
         private Random random = new Random();
         private Bitmap bloomBuffer;
         private Graphics bloomGraphics;
-        private AudioCapture audioCapture;
         
         public VisualizerLogic()
         {
-            audioCapture = new AudioCapture();
             InitializeAudio();
             InitializeParticles();
             animationTimer.Start();
@@ -110,8 +108,6 @@ namespace NekoBeats
         public void Initialize(Size clientSize)
         {
             InitializeBloomBuffer(clientSize);
-            audioCapture.BarCount = barCount;
-            audioCapture.Start();
         }
         
         private void InitializeAudio()
@@ -168,6 +164,7 @@ namespace NekoBeats
             }
         }
         
+        // OLD AUDIO PROCESSING - REACTIVE!
         private void OnData(object sender, WaveInEventArgs e)
         {
             for (int i = 0; i < e.BytesRecorded && fftPos < 2048; i += 4)
@@ -198,14 +195,10 @@ namespace NekoBeats
         
         public void UpdateSmoothing()
         {
-            // Get fresh audio data from AudioCapture
-            float[] rawValues = audioCapture.SmoothedBarValues;
-            
-            for (int i = 0; i < barCount && i < rawValues.Length; i++)
+            // OLD SMOOTHING - MORE REACTIVE
+            for (int i = 0; i < barCount; i++)
             {
-                float raw = rawValues[i] * sensitivity;
-                raw = Math.Min(1f, raw);
-                smoothedBarValues[i] = smoothedBarValues[i] * (1 - smoothSpeed) + raw * smoothSpeed;
+                smoothedBarValues[i] = smoothedBarValues[i] * (1 - smoothSpeed) + barValues[i] * smoothSpeed;
             }
             
             // Update fade effect
@@ -243,7 +236,7 @@ namespace NekoBeats
             barLogic.barRenderer.currentTheme = barLogic.currentTheme;
             barLogic.barRenderer.waveformMode = WaveformMode;
             barLogic.barRenderer.spectrumMode = SpectrumMode;
-            barLogic.barRenderer.waveformData = audioCapture.GetWaveformData();
+            barLogic.barRenderer.waveformData = GetWaveformData(); // Need to add this method
             
             barLogic.Update();
             
@@ -258,6 +251,17 @@ namespace NekoBeats
                 if (hue >= 360) hue -= 360;
                 barColor = ColorFromHSV(hue, 0.8f, 1.0f);
             }
+        }
+        
+        // Helper for waveform data (creates fake waveform from FFT for now)
+        private float[] GetWaveformData()
+        {
+            float[] waveform = new float[512];
+            for (int i = 0; i < 512 && i < barValues.Length; i++)
+            {
+                waveform[i] = barValues[i];
+            }
+            return waveform;
         }
         
         private void UpdateParticles()
@@ -322,7 +326,6 @@ namespace NekoBeats
             barLogic.barRenderer.gradientColors = gradientColors;
             barLogic.barRenderer.waveformMode = WaveformMode;
             barLogic.barRenderer.spectrumMode = SpectrumMode;
-            barLogic.barRenderer.waveformData = audioCapture.GetWaveformData();
             
             if (useGradient && gradientColors != null)
                 barLogic.SetGradient(gradientColors);
@@ -411,17 +414,37 @@ namespace NekoBeats
 
         public void SaveBarPreset(string filePath)
         {
-            barPreset.SaveToFile(filePath);
+            if (barPreset != null)
+                barPreset.SaveToFile(filePath);
         }
         
         public List<string> GetAudioDevices()
         {
-            return audioCapture.GetAudioDevices();
+            var devices = new List<string>();
+            for (int i = 0; i < WaveIn.DeviceCount; i++)
+            {
+                var caps = WaveIn.GetCapabilities(i);
+                devices.Add(caps.ProductName);
+            }
+            return devices;
         }
         
         public void SetAudioDevice(int deviceIndex)
         {
-            audioCapture.SetDevice(deviceIndex);
+            // Reinitialize capture with new device
+            capture?.StopRecording();
+            capture?.Dispose();
+            
+            try
+            {
+                capture = new WasapiLoopbackCapture();
+                capture.DataAvailable += OnData;
+                capture.StartRecording();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to switch audio device: {ex.Message}");
+            }
         }
         
         public void ResetToDefault()
@@ -671,7 +694,6 @@ namespace NekoBeats
         
         public void Dispose()
         {
-            audioCapture?.Dispose();
             if (capture != null)
             {
                 capture.StopRecording();
