@@ -390,7 +390,6 @@ namespace NekoBeats
                     var audioGroup = CreateGroupBox(LanguageManager.Get("AudioSettings"), 10, y, 900, 350);
                     gy = 25;
 
-                    // REMOVED audio device selection - using system default only
                     var systemAudioLabel = new Label { Text = LanguageManager.Get("UsingSystemAudio"), Location = new Point(20, gy), Size = new Size(860, 25), ForeColor = neonCyan, TextAlign = ContentAlignment.MiddleLeft };
                     audioGroup.Controls.Add(systemAudioLabel);
                     gy += 45;
@@ -425,7 +424,7 @@ namespace NekoBeats
                     break;
 
                 case "WINDOW":
-                    var windowGroup = CreateGroupBox(LanguageManager.Get("WindowDisplay"), 10, y, 900, 500);
+                    var windowGroup = CreateGroupBox(LanguageManager.Get("WindowDisplay"), 10, y, 900, 400);
                     gy = 25;
 
                     var fpsLabel = new Label { Text = LanguageManager.Get("FPSLimit"), Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
@@ -445,43 +444,12 @@ namespace NekoBeats
                     draggableCheck = new CheckBox { Text = LanguageManager.Get("Draggable"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.draggable };
                     draggableCheck.CheckedChanged += (s, e) => { visualizer.Logic.draggable = draggableCheck.Checked; };
                     windowGroup.Controls.Add(draggableCheck);
-                    gy += 35;
-
-                    var monitorLabel = new Label { Text = LanguageManager.Get("Monitor"), Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
-                    windowGroup.Controls.Add(monitorLabel);
-                    var monitorCombo = new ComboBox { Location = new Point(170, gy), Size = new Size(220, 25), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = Color.FromArgb(30, 30, 40), ForeColor = neonCyan };
-                    for (int i = 0; i < Screen.AllScreens.Length; i++)
-                    {
-                        var screen = Screen.AllScreens[i];
-                        monitorCombo.Items.Add($"{screen.DeviceName} - {screen.Bounds.Width}x{screen.Bounds.Height}");
-                    }
-                    if (monitorCombo.Items.Count > 0) monitorCombo.SelectedIndex = 0;
-                    monitorCombo.SelectedIndexChanged += (s, e) => { visualizer.SetMonitor(monitorCombo.SelectedIndex); };
-                    windowGroup.Controls.Add(monitorCombo);
-                    gy += 45;
-
-                    var spanBtn = new Button { Text = LanguageManager.Get("SpanAll"), Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
-                    spanBtn.Click += (s, e) => visualizer.SpanAllMonitors();
-                    windowGroup.Controls.Add(spanBtn);
-                    gy += 45;
-
-                    var cloneBtn = new Button { Text = LanguageManager.Get("CloneAll"), Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
-                    cloneBtn.Click += (s, e) =>
-                    {
-                        foreach (var screen in Screen.AllScreens)
-                        {
-                            var clone = new VisualizerForm(pluginLoader);
-                            clone.SetMonitor(Array.IndexOf(Screen.AllScreens, screen));
-                            clone.Show();
-                        }
-                    };
-                    windowGroup.Controls.Add(cloneBtn);
                     gy += 45;
 
                     var bgBtn = new Button { Text = LanguageManager.Get("SetBackground"), Location = new Point(20, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
                     bgBtn.Click += (s, e) => { var dialog = new OpenFileDialog { Filter = "Image Files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp" }; if (dialog.ShowDialog() == DialogResult.OK) { visualizer.Logic.SetCustomBackground(dialog.FileName); MessageBox.Show(LanguageManager.Get("BackgroundSet")); } };
                     windowGroup.Controls.Add(bgBtn);
-                    gy += 35;
+                    gy += 45;
 
                     var clearBgBtn = new Button { Text = LanguageManager.Get("ClearBackground"), Location = new Point(180, gy), Size = new Size(150, 32), BackColor = neonCyan, ForeColor = Color.Black, FlatStyle = FlatStyle.Flat };
                     clearBgBtn.Click += (s, e) => { visualizer.Logic.ClearCustomBackground(); MessageBox.Show(LanguageManager.Get("BackgroundCleared")); };
