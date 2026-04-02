@@ -35,10 +35,8 @@ namespace NekoBeats
         private CheckBox clickThroughCheck;
         private CheckBox draggableCheck;
         private CheckBox fadeEffectCheck;
-        private CheckBox mirrorModeCheck;
         private CheckBox waveformCheck;
         private CheckBox spectrumCheck;
-        private CheckBox invertColorsCheck;
 
         private Color darkBg = Color.FromArgb(10, 10, 15);
         private Color neonCyan = Color.FromArgb(0, 255, 200);
@@ -168,38 +166,38 @@ namespace NekoBeats
                 Padding = new Padding(8)
             };
 
-            var resetBtn = new Button 
-            { 
-                Text = LanguageManager.Get("Reset"), 
-                Location = new Point(10, 12), 
-                Size = new Size(85, 31), 
-                BackColor = neonCyan, 
-                ForeColor = Color.Black, 
-                FlatStyle = FlatStyle.Flat, 
-                Font = new Font("Courier New", 10, FontStyle.Bold), 
-                Cursor = Cursors.Hand 
+            var resetBtn = new Button
+            {
+                Text = LanguageManager.Get("Reset"),
+                Location = new Point(10, 12),
+                Size = new Size(85, 31),
+                BackColor = neonCyan,
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Courier New", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
             };
-            resetBtn.Click += (s, e) => 
-            { 
-                var result = MessageBox.Show(LanguageManager.Get("ResetConfirm"), LanguageManager.Get("ConfirmReset"), MessageBoxButtons.YesNo); 
-                if (result == DialogResult.Yes) 
-                { 
-                    visualizer.Logic.ResetToDefault(); 
-                    ShowTab("VIZ"); 
-                } 
+            resetBtn.Click += (s, e) =>
+            {
+                var result = MessageBox.Show(LanguageManager.Get("ResetConfirm"), LanguageManager.Get("ConfirmReset"), MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    visualizer.Logic.ResetToDefault();
+                    ShowTab("VIZ");
+                }
             };
             footerPanel.Controls.Add(resetBtn);
 
-            var exitBtn = new Button 
-            { 
-                Text = LanguageManager.Get("Exit"), 
-                Location = new Point(850, 12), 
-                Size = new Size(85, 31), 
-                BackColor = neonCyan, 
-                ForeColor = Color.Black, 
-                FlatStyle = FlatStyle.Flat, 
-                Font = new Font("Courier New", 10, FontStyle.Bold), 
-                Cursor = Cursors.Hand 
+            var exitBtn = new Button
+            {
+                Text = LanguageManager.Get("Exit"),
+                Location = new Point(850, 12),
+                Size = new Size(85, 31),
+                BackColor = neonCyan,
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Courier New", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
             };
             exitBtn.Click += (s, e) => Environment.Exit(0);
             footerPanel.Controls.Add(exitBtn);
@@ -317,7 +315,7 @@ namespace NekoBeats
                     break;
 
                 case "FX":
-                    var fxGroup = CreateGroupBox(LanguageManager.Get("Effects"), 10, y, 900, 550);
+                    var fxGroup = CreateGroupBox(LanguageManager.Get("Effects"), 10, y, 900, 720);
                     gy = 25;
 
                     bloomCheck = new CheckBox { Text = LanguageManager.Get("Bloom"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.bloomEnabled };
@@ -374,6 +372,16 @@ namespace NekoBeats
                     fadeSpeedTrack = new TrackBar { Location = new Point(170, gy - 5), Size = new Size(620, 45), Minimum = 1, Maximum = 100, Value = (int)(visualizer.Logic.fadeEffectSpeed * 100), TickStyle = TickStyle.None, BackColor = boxBg };
                     fadeSpeedTrack.ValueChanged += (s, e) => { visualizer.Logic.fadeEffectSpeed = fadeSpeedTrack.Value / 100f; fadeValue.Text = fadeSpeedTrack.Value.ToString(); visualizer.Invalidate(); };
                     fxGroup.Controls.Add(fadeSpeedTrack);
+                    gy += 45;
+
+                    waveformCheck = new CheckBox { Text = LanguageManager.Get("WaveformView"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.WaveformMode };
+                    waveformCheck.CheckedChanged += (s, e) => { visualizer.Logic.WaveformMode = waveformCheck.Checked; visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(waveformCheck);
+                    gy += 35;
+
+                    spectrumCheck = new CheckBox { Text = LanguageManager.Get("SpectrumAnalyzer"), Location = new Point(20, gy), Size = new Size(220, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.SpectrumMode };
+                    spectrumCheck.CheckedChanged += (s, e) => { visualizer.Logic.SpectrumMode = spectrumCheck.Checked; visualizer.Invalidate(); };
+                    fxGroup.Controls.Add(spectrumCheck);
 
                     currentTabPanel.Controls.Add(fxGroup);
                     break;
