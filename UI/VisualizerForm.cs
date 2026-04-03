@@ -4,6 +4,8 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NekoBeats
 {
@@ -57,13 +59,30 @@ namespace NekoBeats
         private bool isDragging = false;
 
         public bool streamingMode = false;
+        
+        // Multi-monitor support
+        private static List<VisualizerForm> instances = new List<VisualizerForm>();
+        private int monitorIndex;
+        private bool isClone = false;
 
-        public VisualizerForm(PluginLoader loader)
+        public VisualizerForm(PluginLoader loader, int monitorIndex = -1, bool isClone = false)
         {
+            this.monitorIndex = monitorIndex;
+            this.isClone = isClone;
             pluginLoader = loader;
             InitializeForm();
             InitializeLogic();
             InitializeTimer();
+            
+            if (monitorIndex >= 0 && monitorIndex < Screen.AllScreens.Length)
+            {
+                var screen = Screen.AllScreens[monitorIndex];
+                this.Location = screen.Bounds.Location;
+                this.Size = screen.Bounds.Size;
+            }
+            
+            if (!isClone)
+                instances.Add(this);
         }
 
         private void InitializeForm()
@@ -179,25 +198,41 @@ namespace NekoBeats
             }
         }
 
-        public void SetMonitor(int monitorIndex)
+        // Multi-monitor static methods
+        public static void ToggleMonitor(int monitorIndex, bool active)
         {
-            if (monitorIndex < 0 || monitorIndex >= Screen.AllScreens.Length) return;
-            
-            var screen = Screen.AllScreens[monitorIndex];
-            this.Location = screen.Bounds.Location;
-            this.Size = screen.Bounds.Size;
-            this.Invalidate();
+            if (active)
+            {
+                bool exists = instances.Any(f => f.monitorIndex == monitorIndex);
+                if (!exists)
+                {
+                    var newForm = new VisualizerForm(null, monitorIndex, false);
+                    newForm.Show();
+                }
+            }
+            else
+            {
+                var form = instances.FirstOrDefault(f => f.monitorIndex == monitorIndex);
+                if (form != null)
+                {
+                    instances.Remove(form);
+                    form.Close();
+                    form.Dispose();
+                }
+            }
         }
 
-        public void SpanAllMonitors()
+        public static bool IsMonitorActive(int monitorIndex)
         {
-            Rectangle bounds = Rectangle.Empty;
-            foreach (var screen in Screen.AllScreens)
-                bounds = Rectangle.Union(bounds, screen.Bounds);
-            
-            this.Location = bounds.Location;
-            this.Size = bounds.Size;
-            this.Invalidate();
+            return instances.Any(f => f.monitorIndex == monitorIndex);
+        }
+
+        public static void UpdateAllMonitors()
+        {
+            foreach (var form in instances)
+            {
+                form.Invalidate();
+            }
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
@@ -256,6 +291,10 @@ namespace NekoBeats
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
+            if (!isClone)
+            {
+                instances.Remove(this);
+            }
             logic?.Dispose();
         }
 
