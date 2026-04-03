@@ -155,7 +155,7 @@ namespace NekoBeats
             if (particlesEnabled) ResetParticles(clientSize);
         }
         
-        public void ResetParticles(Size clientSize)
+        private void ResetParticles(Size clientSize)
         {
             particles.Clear();
             for (int i = 0; i < particleCount; i++)
@@ -164,10 +164,10 @@ namespace NekoBeats
                 {
                     X = random.Next(0, Math.Max(1, clientSize.Width)),
                     Y = random.Next(0, Math.Max(1, clientSize.Height)),
-                    Size = random.Next(2, 8),
+                    Size = random.Next(2, 6),
                     SpeedX = (random.NextSingle() - 0.5f) * 2,
                     SpeedY = (random.NextSingle() - 0.5f) * 2,
-                    Life = random.Next(50, 200) / 100f
+                    Life = random.Next(50, 200)
                 });
             }
         }
@@ -202,17 +202,9 @@ namespace NekoBeats
         
         public void UpdateSmoothing()
         {
-            if (!isAudioInitialized)
+            for (int i = 0; i < 512; i++)
             {
-                // Try to reinitialize if failed
-                InitializeAudio();
-                return;
-            }
-            
-            // OLD SMOOTHING - MORE REACTIVE
-            for (int i = 0; i < barCount; i++)
-            {
-                smoothedBarValues[i] = smoothedBarValues[i] * (1 - smoothSpeed) + barValues[i] * smoothSpeed;
+                smoothedBarValues[i] += (barValues[i] - smoothedBarValues[i]) * smoothSpeed;
             }
             
             // Update fade effect
@@ -248,9 +240,6 @@ namespace NekoBeats
             barLogic.barRenderer.useGradient = useGradient;
             barLogic.barRenderer.gradientColors = gradientColors;
             barLogic.barRenderer.currentTheme = barLogic.currentTheme;
-            barLogic.barRenderer.waveformMode = WaveformMode;
-            barLogic.barRenderer.spectrumMode = SpectrumMode;
-            barLogic.barRenderer.waveformData = GetWaveformData();
             
             barLogic.Update();
             
@@ -278,41 +267,23 @@ namespace NekoBeats
         }
         
         private void UpdateParticles()
-{
-    float audioLevel = 0;
-    for (int i = 0; i < Math.Min(12, smoothedBarValues.Length); i++)
-        audioLevel += smoothedBarValues[i];
-    audioLevel /= 12;
-    
-    if (audioLevel > 0.5f && random.Next(100) < 20)
-    {
-        for (int i = 0; i < 3; i++)
         {
-            particles.Add(new Particle
+            if (particles.Count < particleCount && random.Next(100) < 15)
             {
-                X = random.Next(0, 800),
-                Y = 600 - random.Next(100),
-                SpeedX = (random.NextSingle() - 0.5f) * 2,
-                SpeedY = (random.NextSingle() - 1.0f) * 2,
-                Size = random.Next(2, 5),
-                Life = 1.0f
-            });
+                for (int i = 0; i < 2; i++)
+                {
+                    particles.Add(new Particle
+                    {
+                        X = random.Next(0, 1920),
+                        Y = 600 - random.Next(100),
+                        SpeedX = (random.NextSingle() - 0.5f) * 2f,
+                        SpeedY = (random.NextSingle() - 1.0f) * 2f,
+                        Size = random.Next(2, 6),
+                        Life = random.Next(50, 200)
+                    });
+                }
+            }
         }
-    }
-    
-    for (int i = particles.Count - 1; i >= 0; i--)
-    {
-        Particle p = particles[i];
-        p.X += p.SpeedX;
-        p.Y += p.SpeedY;
-        p.Life -= 0.02f;
-        
-        if (p.Life <= 0 || p.Y < 0 || p.X < 0 || p.X > 800)
-            particles.RemoveAt(i);
-        else
-            particles[i] = p;
-    }
-}
         
         public void Render(Graphics g, Size clientSize)
         {
@@ -360,17 +331,42 @@ namespace NekoBeats
         }
         
         private void DrawParticles(Graphics g, Size clientSize)
-{
-    foreach (var p in particles)
-    {
-        int alpha = (int)(p.Life * 200);
-        alpha = Math.Clamp(alpha, 0, 255);  // ONLY ADD THIS LINE
-        using (SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, barColor)))
         {
-            g.FillEllipse(brush, p.X - 2, p.Y - 2, p.Size, p.Size);
+            float bass = GetBassLevel();
+            using (SolidBrush brush = new SolidBrush(Color.FromArgb(180, Color.Purple)))
+            {
+                for (int i = 0; i < particles.Count; i++)
+                {
+                    Particle p = particles[i];
+                    
+                    if (bass > 0.15f) p.SpeedY -= bass * 2.5f;
+                    
+                    p.X += p.SpeedX;
+                    p.Y += p.SpeedY;
+                    p.Life--;
+                    
+                    if (p.Life <= 0 || p.Y < -20 || p.X < -20 || p.X > clientSize.Width + 20)
+                    {
+                        p.X = random.Next(0, clientSize.Width);
+                        p.Y = clientSize.Height + 10;
+                        p.Life = random.Next(50, 200);
+                        p.SpeedY = (random.NextSingle() - 1.0f) * 2.0f;
+                        p.SpeedX = (random.NextSingle() - 0.5f) * 2.0f;
+                    }
+                    
+                    particles[i] = p;
+                    g.FillEllipse(brush, p.X, p.Y, p.Size, p.Size);
+                }
+            }
         }
-    }
-}
+        private float GetBassLevel()
+        {
+            float sum = 0;
+            int count = Math.Min(12, barCount);
+            for (int i = 0; i < count; i++) 
+                sum += smoothedBarValues[i];
+            return sum / count;
+        }
         
         private void ApplyBloomEffect(Graphics g, Size clientSize)
         {
