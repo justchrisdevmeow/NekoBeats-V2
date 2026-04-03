@@ -35,6 +35,10 @@ namespace NekoBeats
         public int fpsLimit = 60;
         public bool colorCycling = false;
         public float colorSpeed = 1.0f;
+        public bool showFPS = false;
+        public int currentFPS = 60;
+        private DateTime lastFPSTime = DateTime.Now;
+        private int frameCount = 0;
         
         // Bar themes & animations
         public bool rainbowBars = true;
