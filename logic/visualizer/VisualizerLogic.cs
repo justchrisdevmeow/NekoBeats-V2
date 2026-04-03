@@ -278,45 +278,41 @@ namespace NekoBeats
         }
         
         private void UpdateParticles()
+{
+    float audioLevel = 0;
+    for (int i = 0; i < Math.Min(12, smoothedBarValues.Length); i++)
+        audioLevel += smoothedBarValues[i];
+    audioLevel /= 12;
+    
+    if (audioLevel > 0.5f && random.Next(100) < 20)
+    {
+        for (int i = 0; i < 3; i++)
         {
-            float audioLevel = 0;
-            for (int i = 0; i < Math.Min(12, smoothedBarValues.Length); i++)
-                audioLevel += smoothedBarValues[i];
-            audioLevel /= 12;
-            
-            // Spawn particles based on audio level
-            if (particlesEnabled && audioLevel > 0.3f && random.Next(100) < 25)
+            particles.Add(new Particle
             {
-                int spawnCount = random.Next(2, 6);
-                for (int i = 0; i < spawnCount; i++)
-                {
-                    particles.Add(new Particle
-                    {
-                        X = random.Next(0, Math.Max(1, currentClientSize.Width)),
-                        Y = random.Next((int)(currentClientSize.Height * 0.6f), (int)(currentClientSize.Height * 0.9f)),
-                        SpeedX = (random.NextSingle() - 0.5f) * 3,
-                        SpeedY = (random.NextSingle() - 1.5f) * 2,
-                        Size = random.Next(3, 8),
-                        Life = 1.0f
-                    });
-                }
-            }
-            
-            // Update and remove dead particles
-            for (int i = particles.Count - 1; i >= 0; i--)
-            {
-                Particle p = particles[i];
-                p.X += p.SpeedX;
-                p.Y += p.SpeedY;
-                p.Life -= 0.02f;
-                
-                // Remove if dead or off screen
-                if (p.Life <= 0 || p.Y < -50 || p.Y > currentClientSize.Height + 50 || p.X < -100 || p.X > currentClientSize.Width + 100)
-                    particles.RemoveAt(i);
-                else
-                    particles[i] = p;
-            }
+                X = random.Next(0, 800),
+                Y = 600 - random.Next(100),
+                SpeedX = (random.NextSingle() - 0.5f) * 2,
+                SpeedY = (random.NextSingle() - 1.0f) * 2,
+                Size = random.Next(2, 5),
+                Life = 1.0f
+            });
         }
+    }
+    
+    for (int i = particles.Count - 1; i >= 0; i--)
+    {
+        Particle p = particles[i];
+        p.X += p.SpeedX;
+        p.Y += p.SpeedY;
+        p.Life -= 0.02f;
+        
+        if (p.Life <= 0 || p.Y < 0 || p.X < 0 || p.X > 800)
+            particles.RemoveAt(i);
+        else
+            particles[i] = p;
+    }
+}
         
         public void Render(Graphics g, Size clientSize)
         {
