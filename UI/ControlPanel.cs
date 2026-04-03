@@ -439,8 +439,8 @@ namespace NekoBeats
                     break;
 
                 case "WINDOW":
-                    var windowGroup = CreateGroupBox(LanguageManager.Get("WindowDisplay"), 10, y, 900, 500);
-                    gy = 25;
+                    var windowGroup = CreateGroupBox(LanguageManager.Get("WindowDisplay"), 10, y, 900, 400);
+                    int gy = 25;
                 
                     var fpsLabel = new Label { Text = LanguageManager.Get("FPSLimit"), Location = new Point(20, gy + 5), Size = new Size(140, 20), ForeColor = dimText };
                     windowGroup.Controls.Add(fpsLabel);
@@ -476,10 +476,9 @@ namespace NekoBeats
                     };
                     windowGroup.Controls.Add(fpsCounterCheck);
                     gy += 35;
-                    }
+                
                     currentTabPanel.Controls.Add(windowGroup);
-                    break; 
-
+                    break;
 
                 case "PRESETS":
                     var presetsGroup = CreateGroupBox(LanguageManager.Get("PresetsPlugins"), 10, y, 900, 650);
