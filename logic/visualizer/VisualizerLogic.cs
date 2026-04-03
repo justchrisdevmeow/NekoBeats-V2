@@ -52,6 +52,9 @@ namespace NekoBeats
         public bool particlesEnabled = false;
         public int particleCount = 100;
         public float circleRadius = 200f;
+        public bool beatPulseEnabled = false;
+        public float beatPulseIntensity = 0.2f;
+        private float beatPulseAlpha = 0f;
         
         // v2.3.4 properties
         public bool WaveformMode { get; set; } = false;
