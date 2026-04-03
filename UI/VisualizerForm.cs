@@ -51,6 +51,7 @@ namespace NekoBeats
             public byte AlphaFormat;
         }
 
+        private static VisualizerLogic sharedLogic;
         private VisualizerLogic logic;
         private Timer renderTimer;
         private PluginLoader pluginLoader;
@@ -64,14 +65,22 @@ namespace NekoBeats
         private static List<VisualizerForm> instances = new List<VisualizerForm>();
         private int monitorIndex;
         private bool isClone = false;
+        private static VisualizerForm mainForm;
 
         public VisualizerForm(PluginLoader loader, int monitorIndex = -1, bool isClone = false)
         {
             this.monitorIndex = monitorIndex;
             this.isClone = isClone;
             pluginLoader = loader;
+            
+            // Initialize shared logic once
+            if (sharedLogic == null)
+            {
+                sharedLogic = new VisualizerLogic();
+            }
+            this.logic = sharedLogic;
+            
             InitializeForm();
-            InitializeLogic();
             InitializeTimer();
             
             if (monitorIndex >= 0 && monitorIndex < Screen.AllScreens.Length)
@@ -82,7 +91,11 @@ namespace NekoBeats
             }
             
             if (!isClone)
+            {
                 instances.Add(this);
+                if (monitorIndex == 0)
+                    mainForm = this;
+            }
         }
 
         private void InitializeForm()
@@ -107,11 +120,8 @@ namespace NekoBeats
 
             int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
             SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-        }
-
-        private void InitializeLogic()
-        {
-            logic = new VisualizerLogic();
+            
+            // Initialize logic with client size
             logic.Initialize(this.ClientSize);
         }
 
@@ -216,8 +226,20 @@ namespace NekoBeats
                 if (form != null)
                 {
                     instances.Remove(form);
-                    form.Close();
-                    form.Dispose();
+                    
+                    // Don't close if it's the last form
+                    if (instances.Count == 0)
+                    {
+                        // Keep the form but hide it, or create a fallback on monitor 0
+                        form.Hide();
+                        // Re-add to instances so it can be shown again
+                        instances.Add(form);
+                    }
+                    else
+                    {
+                        form.Close();
+                        form.Dispose();
+                    }
                 }
             }
         }
@@ -291,11 +313,11 @@ namespace NekoBeats
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!isClone)
+            if (!isClone && instances.Contains(this))
             {
                 instances.Remove(this);
             }
-            logic?.Dispose();
+            // Don't dispose shared logic - other forms might need it
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e)
