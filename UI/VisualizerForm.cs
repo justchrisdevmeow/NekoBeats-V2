@@ -51,7 +51,6 @@ namespace NekoBeats
             public byte AlphaFormat;
         }
 
-        private static VisualizerLogic sharedLogic;
         private VisualizerLogic logic;
         private Timer renderTimer;
         private PluginLoader pluginLoader;
@@ -61,41 +60,20 @@ namespace NekoBeats
 
         public bool streamingMode = false;
         
-        // Multi-monitor support
-        private static List<VisualizerForm> instances = new List<VisualizerForm>();
-        private int monitorIndex;
-        private bool isClone = false;
-        private static VisualizerForm mainForm;
+        // Multi-monitor spanning
+        private List<int> activeMonitors = new List<int>();
+        private Rectangle totalBounds;
 
-        public VisualizerForm(PluginLoader loader, int monitorIndex = -1, bool isClone = false)
+        public VisualizerForm(PluginLoader loader)
         {
-            this.monitorIndex = monitorIndex;
-            this.isClone = isClone;
             pluginLoader = loader;
-            
-            // Initialize shared logic once
-            if (sharedLogic == null)
-            {
-                sharedLogic = new VisualizerLogic();
-            }
-            this.logic = sharedLogic;
-            
             InitializeForm();
+            InitializeLogic();
             InitializeTimer();
             
-            if (monitorIndex >= 0 && monitorIndex < Screen.AllScreens.Length)
-            {
-                var screen = Screen.AllScreens[monitorIndex];
-                this.Location = screen.Bounds.Location;
-                this.Size = screen.Bounds.Size;
-            }
-            
-            if (!isClone)
-            {
-                instances.Add(this);
-                if (monitorIndex == 0)
-                    mainForm = this;
-            }
+            // Start with primary monitor active
+            activeMonitors.Add(0);
+            UpdateSpanBounds();
         }
 
         private void InitializeForm()
@@ -107,7 +85,6 @@ namespace NekoBeats
                 this.Icon = new Icon("NekoBeatsLogo.ico");
             }
 
-            this.WindowState = FormWindowState.Maximized;
             this.FormBorderStyle = FormBorderStyle.None;
             this.TopMost = true;
             this.ShowInTaskbar = false;
@@ -118,10 +95,18 @@ namespace NekoBeats
             this.MouseMove += OnMouseMove;
             this.MouseUp += OnMouseUp;
 
-            int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
-            SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-            
-            // Initialize logic with client size
+            if (!streamingMode)
+            {
+                int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
+                SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+                this.BackColor = Color.Magenta;
+                this.TransparencyKey = Color.Magenta;
+            }
+        }
+
+        private void InitializeLogic()
+        {
+            logic = new VisualizerLogic();
             logic.Initialize(this.ClientSize);
         }
 
@@ -154,6 +139,8 @@ namespace NekoBeats
 
         public void SetClickThrough(bool enable)
         {
+            if (streamingMode) return;
+            
             int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
             if (enable)
             {
@@ -195,66 +182,55 @@ namespace NekoBeats
                 this.TopMost = true;
                 this.BackColor = Color.Magenta;
                 this.TransparencyKey = Color.Magenta;
-                this.WindowState = FormWindowState.Maximized;
                 this.Text = LanguageManager.Get("VisualizerTitle");
                 SetClickThrough(true);
                 
                 int style = GetWindowLong(this.Handle, GWL_EXSTYLE);
                 SetWindowLong(this.Handle, GWL_EXSTYLE, style | WS_EX_LAYERED);
                 
+                UpdateSpanBounds();
                 this.Show();
                 this.BringToFront();
                 this.Invalidate();
             }
         }
 
-        // Multi-monitor static methods
-        public static void ToggleMonitor(int monitorIndex, bool active)
+        // Monitor spanning methods
+        public void ToggleMonitor(int monitorIndex, bool active)
         {
-            if (active)
+            if (active && !activeMonitors.Contains(monitorIndex))
             {
-                bool exists = instances.Any(f => f.monitorIndex == monitorIndex);
-                if (!exists)
-                {
-                    var newForm = new VisualizerForm(null, monitorIndex, false);
-                    newForm.Show();
-                }
+                activeMonitors.Add(monitorIndex);
             }
-            else
+            else if (!active && activeMonitors.Contains(monitorIndex))
             {
-                var form = instances.FirstOrDefault(f => f.monitorIndex == monitorIndex);
-                if (form != null)
-                {
-                    instances.Remove(form);
-                    
-                    // Don't close if it's the last form
-                    if (instances.Count == 0)
-                    {
-                        // Keep the form but hide it, or create a fallback on monitor 0
-                        form.Hide();
-                        // Re-add to instances so it can be shown again
-                        instances.Add(form);
-                    }
-                    else
-                    {
-                        form.Close();
-                        form.Dispose();
-                    }
-                }
+                activeMonitors.Remove(monitorIndex);
             }
+            
+            if (activeMonitors.Count == 0)
+            {
+                activeMonitors.Add(0);
+            }
+            
+            UpdateSpanBounds();
         }
 
-        public static bool IsMonitorActive(int monitorIndex)
+        public bool IsMonitorActive(int monitorIndex)
         {
-            return instances.Any(f => f.monitorIndex == monitorIndex);
+            return activeMonitors.Contains(monitorIndex);
         }
 
-        public static void UpdateAllMonitors()
+        private void UpdateSpanBounds()
         {
-            foreach (var form in instances)
+            totalBounds = Rectangle.Empty;
+            foreach (int idx in activeMonitors)
             {
-                form.Invalidate();
+                totalBounds = Rectangle.Union(totalBounds, Screen.AllScreens[idx].Bounds);
             }
+            
+            this.Location = totalBounds.Location;
+            this.Size = totalBounds.Size;
+            this.Invalidate();
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
@@ -280,8 +256,33 @@ namespace NekoBeats
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.Clear(Color.Transparent);
-                logic.RenderCustomBackground(g, this.ClientSize);
-                logic.Render(g, this.ClientSize);
+                
+                // Render to each active monitor region
+                foreach (int idx in activeMonitors)
+                {
+                    var screen = Screen.AllScreens[idx];
+                    var relativeBounds = new Rectangle(
+                        screen.Bounds.X - this.Location.X,
+                        screen.Bounds.Y - this.Location.Y,
+                        screen.Bounds.Width,
+                        screen.Bounds.Height
+                    );
+                    
+                    g.SetClip(relativeBounds);
+                    
+                    // Create bitmap for this monitor
+                    using (Bitmap monitorBitmap = new Bitmap(screen.Bounds.Width, screen.Bounds.Height, PixelFormat.Format32bppArgb))
+                    using (Graphics monitorG = Graphics.FromImage(monitorBitmap))
+                    {
+                        monitorG.Clear(Color.Transparent);
+                        logic.RenderCustomBackground(monitorG, screen.Bounds.Size);
+                        logic.Render(monitorG, screen.Bounds.Size);
+                        g.DrawImage(monitorBitmap, relativeBounds.Location);
+                    }
+                    
+                    g.ResetClip();
+                }
+                
                 UpdateLayeredWindow(bitmap);
             }
         }
@@ -313,11 +314,7 @@ namespace NekoBeats
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!isClone && instances.Contains(this))
-            {
-                instances.Remove(this);
-            }
-            // Don't dispose shared logic - other forms might need it
+            logic?.Dispose();
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e)
@@ -329,7 +326,6 @@ namespace NekoBeats
                 if (this.WindowState == FormWindowState.Maximized)
                 {
                     this.WindowState = FormWindowState.Normal;
-                    this.Size = new Size(1920, 1080);
                 }
 
                 isDragging = true;
@@ -364,16 +360,6 @@ namespace NekoBeats
         public void LoadPreset(string filename)
         {
             logic.LoadPreset(filename);
-        }
-
-        public void SetCustomBackground(string imagePath)
-        {
-            logic.SetCustomBackground(imagePath);
-        }
-
-        public void ClearCustomBackground()
-        {
-            logic.ClearCustomBackground();
         }
 
         public VisualizerLogic Logic => logic;
