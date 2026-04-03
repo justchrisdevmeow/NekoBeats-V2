@@ -367,7 +367,9 @@ namespace NekoBeats
         {
             foreach (var p in particles)
             {
-                int alpha = (int)(p.Life * 200);
+                int alpha = (int)(p.Life * 255);
+                alpha = Math.Clamp(alpha, 0, 255);
+                
                 if (alpha > 0)
                 {
                     using (SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, barColor)))
