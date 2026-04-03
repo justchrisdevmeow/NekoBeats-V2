@@ -232,6 +232,12 @@ jobs:
             "UsingSystemAudio": "NekoBeats automatically uses your system audio for visualization."
           }
           EOF
+
+      - name: Remove incomplete translations
+        run: |
+          cd lang
+          find . -type f -name "*.json" ! -name "en.json" -delete
+          echo "Removed all translations except en.json"
       
       - name: Run translation generator
         run: |
