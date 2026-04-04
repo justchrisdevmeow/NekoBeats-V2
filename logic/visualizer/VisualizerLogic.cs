@@ -62,6 +62,11 @@ namespace NekoBeats
         public bool barFlashEnabled = false;
         public float barFlashIntensity = 0.5f;
         private float currentFlashAlpha = 0f;
+        public bool bpmSmoothing = false;
+        private float detectedBPM = 120f;
+        private float[] beatIntervals = new float[10];
+        private int beatIndex = 0;
+        private DateTime lastBeatTime = DateTime.Now;
         
         // Bar Preset System
         public BarPreset barPreset { get; private set; } = null;
@@ -209,6 +214,47 @@ namespace NekoBeats
             }
             fftPos = 0;
         }
+        private void UpdateBPMSmoothing()
+        {
+            if (!bpmSmoothing) return;
+            
+            float bass = 0;
+            for (int i = 0; i < Math.Min(12, barCount); i++)
+                bass += smoothedBarValues[i];
+            bass /= Math.Min(12, barCount);
+            
+            if (bass > 0.5f && (DateTime.Now - lastBeatTime).TotalSeconds > 0.3f)
+            {
+                float interval = (float)(DateTime.Now - lastBeatTime).TotalSeconds;
+                if (interval > 0.2f && interval < 2f)
+                {
+                    beatIntervals[beatIndex] = interval;
+                    beatIndex = (beatIndex + 1) % beatIntervals.Length;
+                    
+                    float sum = 0;
+                    int count = 0;
+                    for (int i = 0; i < beatIntervals.Length; i++)
+                    {
+                        if (beatIntervals[i] > 0)
+                        {
+                            sum += beatIntervals[i];
+                            count++;
+                        }
+                    }
+                    
+                    if (count > 0)
+                    {
+                        float avgInterval = sum / count;
+                        detectedBPM = 60f / avgInterval;
+                        detectedBPM = Math.Clamp(detectedBPM, 60f, 180f);
+                        
+                        float t = (detectedBPM - 60f) / 120f;
+                        smoothSpeed = 0.25f + (0.95f - 0.25f) * t;
+                    }
+                }
+                lastBeatTime = DateTime.Now;
+            }
+        }
         
         public void UpdateSmoothing()
         {
@@ -251,15 +297,17 @@ namespace NekoBeats
             barLogic.barRenderer.gradientColors = gradientColors;
             barLogic.barRenderer.currentTheme = barLogic.currentTheme;
             barLogic.barRenderer.waveformMode = WaveformMode;
-            barLogic.barRenderer.waveformData = GetWaveformData();  // ADD THIS LINE
+            barLogic.barRenderer.spectrumMode = SpectrumMode;
+            barLogic.barRenderer.waveformData = GetWaveformData();
             
             barLogic.Update();
             
             // Update particles
             if (particlesEnabled)
                 UpdateParticles();
-
-            UpdateBarFlash();
+            
+            // Update BPM smoothing
+            UpdateBPMSmoothing();
             
             // Update color cycling
             if (colorCycling)
