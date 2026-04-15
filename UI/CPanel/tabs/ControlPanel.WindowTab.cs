@@ -18,4 +18,32 @@ namespace NekoBeats
             windowGroup.Controls.Add(fpsCombo);
             gy += 45;
 
-            var clickThroughCheck = new CheckBox { Text = LanguageManager.Get("ClickThrough"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg,
+            var clickThroughCheck = new CheckBox { Text = LanguageManager.Get("ClickThrough"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.clickThrough };
+            clickThroughCheck.CheckedChanged += (s, e) => { visualizer.Logic.clickThrough = clickThroughCheck.Checked; visualizer.SetClickThrough(visualizer.Logic.clickThrough); };
+            windowGroup.Controls.Add(clickThroughCheck);
+            gy += 35;
+
+            var draggableCheck = new CheckBox { Text = LanguageManager.Get("Draggable"), Location = new Point(20, gy), Size = new Size(200, 25), ForeColor = neonCyan, BackColor = boxBg, Checked = visualizer.Logic.draggable };
+            draggableCheck.CheckedChanged += (s, e) => { visualizer.Logic.draggable = draggableCheck.Checked; };
+            windowGroup.Controls.Add(draggableCheck);
+            gy += 45;
+
+            var fpsCounterCheck = new CheckBox 
+            { 
+                Text = LanguageManager.Get("ShowFPS"), 
+                Location = new Point(20, gy), 
+                Size = new Size(200, 25), 
+                ForeColor = neonCyan, 
+                BackColor = boxBg,
+                Checked = visualizer.Logic.showFPS
+            };
+            fpsCounterCheck.CheckedChanged += (s, e) => { 
+                visualizer.Logic.showFPS = fpsCounterCheck.Checked; 
+                visualizer.Invalidate(); 
+            };
+            windowGroup.Controls.Add(fpsCounterCheck);
+
+            currentTabPanel.Controls.Add(windowGroup);
+        }
+    }
+}
