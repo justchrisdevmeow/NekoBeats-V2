@@ -10,4 +10,4 @@
 - Not sold or shared with third parties
 
 ## Data Deletion
-Contact [your email] to request removal of your presets
+Contact itzchwis@gmail.com to request removal of your presets
