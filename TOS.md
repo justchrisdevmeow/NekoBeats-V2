@@ -5,3 +5,4 @@
 3. **Right to remove** - We can delete any preset at any time
 4. **Your content is public** - Presets are visible to everyone
 5. **Use at your own risk** - No warranty
+6. **Right to ban IP** - We will ban any IP addresses uploading offensive material constantly.
